@@ -1,0 +1,25 @@
+{
+  "language-levels": {
+        "elementary": "Use words understandable to a 3 to 4 year old child. If there is any topic that someone that age may not be familiar with (accounts, digital privacy, etc...), use a metaphor understandable to someone that age. (Example: Digital Privacy = Keeping your secrets online)",
+        "middle": "Use words understandable to a 11-12 year old student without any prior knowledge of legal standards, abbreviations, etc... You may elaborate on points slightly, but explain any complex topics that may be hard to grasp.",
+        "high": "Use words and phrasing that is understandable to a 15-16 year old student. Keep legal language and jargon to a minimum. Phrase points with concise and semi-professional language typical of someone in the age range.",
+        "adult": "Use words, terms, and phrasing that is understandable to an adult. Legal abbreviations and jargon as well as professional language may be used.",
+        "monkey": "Use words and language typical of a monkey. Make sure to add screeching or hooting sounds regularly. Use grammar understandable to a 3 year old, and go on long rants about bananas or make allusions and metaphors surrounding about bananas."
+      },
+
+  "normal": {
+      "default-prompts": {
+        "default-prompt-head": "Simplify the following terms of service/privacy policy by extracting key points and converting legal jargon to simple english.\n        Note that the terms of service/privacy policy may contain text that needs to be omitted, such as headers or advertisements. If there is anything that doesn't make sense\n        in the context of the terms of service/privacy policy, ignore it.",
+        "default-prompt-middle": " Format with HTML tags instead of markdown. Bold, underline, or highlight important elements, and use emojis in headers and important points\n        Output should be in bullet point form, with no more than 2 points per section, and no more than 2 sentences per point. Please follow the following format:\n        \n        <h1>Summary:</h1>\n            ### Provide a short summary of the terms of service/privacy policy\n        <h1>Points:</h1>\n            <h2>Information and Cookies</h2>\n                ### What the company does with your information. How do they collect it? How is it stored? How is it used? How are cookies used to collect and store your data? \n            <h2>Rules and Regulations</h2>\n                ### What rules apply to users? What happens if these rules are broken?\n            <h2>User Rights</h2>\n                ### What rights do users have for arbitration and over their own information?\n            <h2>Updates</h2>\n                ### How often is this tos? How will users be notified? \n            <h2>Denial of Service</h2>\n                ### How can the company deny the user service. Why may this be done\n            <h2>Objections</h2>\n                ### What can be done if you don't agree to these terms. Will you still be able to use their services, or will you be barred? \n <h2> Warnings </h2> \n ### Is there anything suspicious about this company's history or TOS? If so, what?",
+        "default-prompt-tail": "<h1>Takeaways:</h1>\n            ### Key takeaways from the terms of service\n        \n        Terms of Service to Simplify: \n        ###\n        {policy}\n        ###"
+      }
+  },
+  "short": {
+        "short-head": "Simplify the following terms of service into the following bullet points. Use exactly one point per section, and keep each point under 2 sentences.",
+        "short-tail": "Format by bolding, underlining and highlighting important points with html tags (<ul>, <em>). Add emojis to headers (<h2> elements), in addition to points of emphasis. Format to follow: \n <h1>Summary</h1>\n <h2>Cookies and Information Collection</h2> ### What information does the corporation collect on you? How is it stored? \n <h2>User rights and regulations</h2> \n ### What rights do users have? What regulations do they have to follow? \n <h2>Updates</h2> \n ### How often is this TOS updated? \n <h2>Warnings</h2> \n ### Is there anything suspicious about this company's history or TOS? If so, what? Please only return the response and omit context and information.\n  Terms of Service to simplify: ### {policy} ###"
+      },
+  "chat-comp": {
+    "chat-comp-head": "Answer the following question surrounding a privacy policy/terms of service, with only the information provided in the following excerpt extracted from the terms of service/privacy policy found at {link}. If there is insufficient information, respond with *Insufficient Information*. Format important points with HTML tags (<b>, <em>), and add emojis to headers and points of emphasis. Format the response with HTML tags (<h2>, <h1>, <b>) instead of markup. ",
+    "chat-comp-tail": "\n Question: ### {question} \n \n Excerpt: ### {excerpt}"
+  }
+}
