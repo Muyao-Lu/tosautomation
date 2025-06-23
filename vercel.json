@@ -1,7 +1,23 @@
 {
   "builds": [
     {
-      "src": ["main.py", "convert.py", "ip.py", "main.py", "scraper.py", "vector_db.py"],
+      "src": "main.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "convert.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "ip.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "scraper.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "vector_db.py",
       "use": "@vercel/python"
     }
     
