@@ -1,0 +1,15 @@
+{
+  "builds": [
+    {
+      "src": ["main.py", "convert.py", "ip.py", "main.py", "scraper.py", "vector_db.py"],
+      "use": "@vercel/python"
+    }
+    
+  ],
+  "routes": [
+    {
+      "src": "(.*)",
+      "dest": "main.py"
+    }
+  ]
+}
