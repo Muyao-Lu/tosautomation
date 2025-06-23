@@ -32,6 +32,7 @@ class AiAccess:
 
     def chat_completion(self, query, link):
         prompt = self.PROMPTER.generate_completion_prompt(query, link)
+
         try:
             return self.MAIN_MODEL.call_ai(prompt)
         except:
@@ -51,7 +52,12 @@ class _AiPromptGenerator:
         self.prompts = json.load(open("prompts.json", "r"))
 
     def generate_prompt(self, policy, language_level) -> str:
-
+        """
+        Generates initial prompt for AI models.
+        :param policy: The privacy policy to create the prompt for
+        :param language_level: The level of complexity that the prompt generator should ask for
+        :return: Complete prompt
+        """
         content = self.prompts["normal"]["default-prompts"]["default-prompt-head"]
         content += self.prompts["language-levels"][language_level]
         content += self.prompts["normal"]["default-prompts"]["default-prompt-middle"]
@@ -62,15 +68,29 @@ class _AiPromptGenerator:
         return content
 
     def generate_completion_prompt(self, query, link, language_level="middle") -> str:
+        """
+            Generates prompt for chat-completions (followup questions) for the AI model.
+            :param query: The query (question that the user asked)
+            :param link: Link where the privacy policy originated from
+            :param language_level: The level of complexity that the prompt generator should ask for
+            :return: Complete prompt for chat completions
+        """
         content = self.prompts["chat-comp"]["chat-comp-head"]
         content += self.prompts["language-levels"][language_level]
         content += self.prompts["chat-comp"]["chat-comp-tail"]
-        closest_vector = vector_db.get_closest_neighbor(query)
+        closest_vector = vector_db.get_closest_neighbor(link=link, query=query)
         content = content.format(link=link, question=query, excerpt=closest_vector)
 
         return content
 
+
     def generate_short_prompt(self, policy, language_level="middle") -> str:
+        """
+            Generates prompt for short summaries of the privacy policy.
+            :param policy: Privacy policy to generate prompt for
+            :param language_level: The level of complexity that the prompt generator should ask for
+            :return: Complete prompt for short privacy policy/tos simplification
+        """
         prompt_segment = self.prompts["short"]
         content = prompt_segment["short-head"]
         content += self.prompts["language-levels"][language_level]
@@ -84,10 +104,9 @@ class _GithubAiModel:
         Class for accessing the AI API
     """
     def __init__(self):
-        # self.TOKEN = os.environ["AI_API_KEY"]
+        self.TOKEN = os.environ["AI_API_KEY"]
         self.MODEL = "openai/gpt-4.1-mini"
         self.URL = "https://models.github.ai/inference"
-        self.TOKEN = os.environ["Github-key"]
 
     def call_ai(self, prompt) -> str:# lang: str, mods: list, short: bool) -> str:
         client = OpenAI(
@@ -111,9 +130,7 @@ class _HcAiModel:
 
     def __init__(self):
         self.URL = "https://ai.hackclub.com/chat/completions"
-
-    def call_ai(self, prompt) -> str:# lang: str, mods: list, short: bool) -> str:
-
+    def call_ai(self, prompt) -> str:
         headers = {
             'Content-Type': 'application/json',
         }
