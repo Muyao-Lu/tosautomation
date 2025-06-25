@@ -1,53 +1,47 @@
+from sentence_transformers import CrossEncoder
 from fastapi import FastAPI
-from fastapi.exceptions import HTTPException
-import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from sqlalchemy.exc import NoResultFound
+import uvicorn
 
-from ai import AiAccess
-from scraper import ScraperDatabaseControl
-from convert import convert_to_html
-from ip import IpController
+
+class Ranker:
+
+    def __init__(self):
+        self.ranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
+
+    def rank(self, query, documents):
+        text_list = []
+        rankings = self.ranker.rank(query=query, documents=documents, return_documents=True)
+        for item in rankings:
+            text_list.append({"score": float(item["score"]), "text": item["text"]})
+        return text_list
+
 
 app = FastAPI()
+ranker = Ranker()
 
-webscraper = ScraperDatabaseControl()
-ai_api = AiAccess()
-ip_validation = IpController()
-class Request(BaseModel):
-    link: str
-    ip: str
-    lang: str = "middle"
-    short: bool = False
-    query : str = None
+origins = [
+    "https://tosautomation-backend.vercel.app"
+]
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_methods=["POST"],
+    allow_headers=["*"],
+)
 
-@app.post("/{document_type}/")
-async def process_terms_of_service(document_type, request: Request):
-    if ip_validation.check_request_time_validity(request.ip):
-        if document_type != "followup":
+class RankerModel(BaseModel):
+    query: str
+    documents: list
 
-            webscraper.scrape_to_db(request.link)
-            website = webscraper.get_full_website()
-            text = ai_api.call_summarizer(short=request.short, policy=website, language_level=request.lang)
+@app.post("/")
+async def process_ranking_request(request: RankerModel):
+    result = ranker.rank(query=request.query, documents=request.documents)
+    return result
 
-            return convert_to_html(text)
-        else:
-
-            if request.query is not None:
-                try:
-                    text = ai_api.chat_completion(link=request.link, query=request.query)
-                    return convert_to_html(text)
-                except NoResultFound:
-                    webscraper.scrape_to_db(request.link)
-                    text = ai_api.chat_completion(link=request.link, query=request.query)
-                    return convert_to_html(text)
-
-            else:
-                raise HTTPException(status_code=400, detail="Query parameter cannot be empty for followup questions. Please provide a query in the request body.")
-    else:
-        raise HTTPException(status_code=429, detail="Too many requests. Please obey the 20s rule between requests")
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     uvicorn.run(app, port=800)
+
+
