@@ -1,5 +1,5 @@
 uvicorn~=0.34.2
 fastapi~=0.115.12
-gpt4all
+langchain_cohere
 langchain_community
 pydantic
