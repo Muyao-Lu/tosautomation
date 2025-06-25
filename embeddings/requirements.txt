@@ -1,4 +1,5 @@
 uvicorn~=0.34.2
 fastapi~=0.115.12
-sentence_transformers
+gpt4all
+langchain_community
 pydantic
