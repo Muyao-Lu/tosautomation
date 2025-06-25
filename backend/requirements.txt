@@ -3,7 +3,6 @@ uvicorn~=0.34.2
 fastapi~=0.115.12
 pydantic
 sqlalchemy
-sentence_transformers
 sqlmodel
 langchain_text_splitters
 
