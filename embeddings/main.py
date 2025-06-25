@@ -1,9 +1,9 @@
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
-from langchain_community.embeddings import GPT4AllEmbeddings
+from langchain_cohere import CohereEmbeddings
+
 
 def dot_product(vector_a, vector_b):
     assert len(vector_a) == len(vector_b)
@@ -23,7 +23,7 @@ def norm(vector):
 class Ranker:
 
     def __init__(self):
-        self.embedder = GPT4AllEmbeddings()
+        self.embedder = CohereEmbeddings(model="embed-english-light-v3.0")
 
     def rank(self, query, documents):
 
