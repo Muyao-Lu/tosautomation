@@ -35,17 +35,22 @@ async def process_terms_of_service(document_type, request: Request):
         else:
 
             if request.query is not None:
+                print("1")
                 try:
                     text = ai_api.chat_completion(link=request.link, query=request.query)
+                    print("2")
                     return convert_to_html(text)
                 except NoResultFound:
                     webscraper.scrape_to_db(request.link)
                     text = ai_api.chat_completion(link=request.link, query=request.query)
+                    print("3")
                     return convert_to_html(text)
 
             else:
+                print("4")
                 raise HTTPException(status_code=400, detail="Query parameter cannot be empty for followup questions. Please provide a query in the request body.")
     else:
+        print("5")
         raise HTTPException(status_code=429, detail="Too many requests. Please obey the 20s rule between requests")
 
 
