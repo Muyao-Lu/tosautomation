@@ -5,6 +5,7 @@ pydantic
 sqlalchemy
 sqlmodel
 langchain_text_splitters
+langchain_hyperbrowser
 
 
 
