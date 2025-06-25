@@ -1,21 +1,40 @@
-from sentence_transformers import CrossEncoder
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
+from langchain_community.embeddings import GPT4AllEmbeddings
 
+def dot_product(vector_a, vector_b):
+    assert len(vector_a) == len(vector_b)
+    r = 0
+    for i in range(len(vector_a)):
+        r += abs(vector_a[i] + vector_b[i])
+
+    return r
+
+def norm(vector):
+    r = 0
+    for item in vector:
+        r += item**2
+
+    return r ** (1/2)
 
 class Ranker:
 
     def __init__(self):
-        self.ranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
+        self.embedder = GPT4AllEmbeddings()
 
     def rank(self, query, documents):
-        text_list = []
-        rankings = self.ranker.rank(query=query, documents=documents, return_documents=True)
-        for item in rankings:
-            text_list.append({"score": float(item["score"]), "text": item["text"]})
-        return text_list
+
+        embedded_text_segments = self.embedder.embed_documents(documents)
+        query = self.embedder.embed_query(query)
+        results = zip(embedded_text_segments, documents)
+
+        results = map(lambda x: [dot_product(x[0], query)/(norm(x[0]) * norm(query)), x[1]], iter(results))
+        results = sorted((item for item in results), key = lambda x: x[0], reverse=True)
+
+        return results[0]
 
 
 app = FastAPI()
@@ -43,5 +62,4 @@ async def process_ranking_request(request: RankerModel):
 
 if __name__ == "__main__":
     uvicorn.run(app, port=800)
-
 
