@@ -1,3 +1,4 @@
+print("started")
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
 import uvicorn
@@ -9,11 +10,13 @@ from scraper import ScraperDatabaseControl
 from convert import convert_to_html
 from ip import IpController
 
+print("0")
 app = FastAPI()
 
 webscraper = ScraperDatabaseControl()
 ai_api = AiAccess()
 ip_validation = IpController()
+print("0.5")
 class Request(BaseModel):
     link: str
     ip: str
