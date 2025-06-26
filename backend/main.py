@@ -1,4 +1,3 @@
-print("started")
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
 import uvicorn
@@ -11,6 +10,7 @@ from convert import convert_to_html
 from ip import IpController
 
 print("0")
+"""""
 app = FastAPI()
 
 webscraper = ScraperDatabaseControl()
@@ -59,3 +59,4 @@ async def process_terms_of_service(document_type, request: Request):
 
 if __name__ == '__main__':
     uvicorn.run(app, port=800)
+"""""
