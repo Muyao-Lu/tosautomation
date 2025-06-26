@@ -23,7 +23,7 @@
     {
       "src": "vector_db.py",
       "use": "@vercel/python"
-    },
+    }
   ],
   "routes": [
     {
