@@ -26,14 +26,14 @@ class Request(BaseModel):
 
 @app.post("/{document_type}/")
 async def process_terms_of_service(document_type, request: Request):
+    return {"hi":"hi"}
+    """""
     if ip_validation.check_request_time_validity(request.ip):
         if document_type != "followup":
             return "success"
-            """""
             webscraper.scrape_to_db(request.link)
             website = webscraper.get_full_website()
             text = ai_api.call_summarizer(short=request.short, policy=website, language_level=request.lang)
-            """""
             return convert_to_html(text)
         else:
 
@@ -55,6 +55,7 @@ async def process_terms_of_service(document_type, request: Request):
     else:
         print("5")
         raise HTTPException(status_code=429, detail="Too many requests. Please obey the 20s rule between requests")
+    """""
 
 
 if __name__ == '__main__':
