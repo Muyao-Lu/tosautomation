@@ -5,7 +5,7 @@ dotenv.load_dotenv()
 
 class ScraperModel:
     def __init__(self):
-        self.api_key = os.environ["HYPERBROWSER_KEY"]
+        self.api_key = os.environ["HYPERBROWSER_API_KEY"]
 
     def scrape(self, link):
         loader = HyperbrowserLoader(
