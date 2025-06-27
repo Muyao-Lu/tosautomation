@@ -11,7 +11,7 @@ class IpModel(SQLModel, table=True):
 class IpController:
     def __init__(self, time_limit: float | int = 20):
         self.time_limit = time_limit
-        self.DATABASE_URL = "postgresql://postgres:{key}@db.kvzyyqxeawybeukfybkq.supabase.co:5432/postgres".format(key=os.environ["SUPABASE_KEY"])
+        self.DATABASE_URL = "postgresql://postgres.kvzyyqxeawybeukfybkq:{key}@aws-0-ca-central-1.pooler.supabase.com:6543/postgres".format(key=os.environ["SUPABASE_KEY"])
         self.engine = create_engine(self.DATABASE_URL)
         SQLModel.metadata.create_all(self.engine)
 
