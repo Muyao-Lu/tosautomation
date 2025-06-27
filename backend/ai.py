@@ -81,6 +81,8 @@ class _AiPromptGenerator:
         closest_vector = vector_db.get_closest_neighbor(link=link, query=query)
         content = content.format(link=link, question=query, excerpt=closest_vector)
 
+        print(content)
+
         return content
 
 
