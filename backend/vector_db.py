@@ -11,7 +11,7 @@ class VectorDatabaseModel(SQLModel, table=True):
 
 class VectorDatabaseControl:
     def __init__(self, top_k=1):
-        self.DATABASE_URL = "postgresql://postgres.kvzyyqxeawybeukfybkq:{key}@aws-0-ca-central-1.pooler.supabase.com:6543/postgres".format(key=os.environ["SUPABASE_KEY"])
+        self.DATABASE_URL = "postgresql://postgres.fkbsrnqotuynrsplskxe:{key}@aws-0-us-east-2.pooler.supabase.com:6543/postgres".format(key=os.environ["SUPABASE_KEY"])
         self.engine = create_engine(self.DATABASE_URL)
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=2000,
