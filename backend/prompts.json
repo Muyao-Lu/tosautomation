@@ -19,7 +19,7 @@
         "short-tail": "Format by bolding, underlining and highlighting important points with html tags (<ul>, <em>). Add emojis to headers (<h2> elements), in addition to points of emphasis. Format to follow: \n <h1>Summary</h1>\n <h2>Cookies and Information Collection</h2> ### What information does the corporation collect on you? How is it stored? \n <h2>User rights and regulations</h2> \n ### What rights do users have? What regulations do they have to follow? \n <h2>Updates</h2> \n ### How often is this TOS updated? \n <h2>Warnings</h2> \n ### Is there anything suspicious about this company's history or TOS? If so, what? Please only return the response and omit context and information.\n  Terms of Service to simplify: ### {policy} ###"
       },
   "chat-comp": {
-    "chat-comp-head": "Answer the following question surrounding a privacy policy/terms of service in 3-4 sentences. Use only information extracted from the terms of service/privacy policy found at {link}. If there is insufficient information, external sources may be used, but must be cited. Format the response with HTML tags (<h2>, <h1>, <b>) instead of markup, and add emojis. Do not restate the question.",
+    "chat-comp-head": "Answer the following question surrounding a privacy policy/terms of service as concisely as possible. Use only information extracted from the terms of service/privacy policy found at {link}. If there is insufficient information, external sources may be used, but must be cited. Format the response with HTML tags (<h2>, <h1>, <b>) instead of markup, and add emojis. Do not restate the question.",
     "chat-comp-tail": "\n Question: ### {question} \n \n Excerpt: ### {excerpt}"
   }
 }
