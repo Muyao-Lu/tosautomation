@@ -1,10 +1,11 @@
 from langchain_hyperbrowser import HyperbrowserLoader
 from vector_db import vector_db
-import os
+import os, dotenv
+dotenv.load_dotenv()
 
 class ScraperModel:
     def __init__(self):
-        self.api_key = os.environ["HYPERBROWSER_API_KEY"]
+        self.api_key = os.environ["HYPERBROWSER_KEY"]
 
     def scrape(self, link):
         loader = HyperbrowserLoader(

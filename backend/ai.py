@@ -1,7 +1,8 @@
 from openai import OpenAI
-import json, requests, os
+import json, requests, os, dotenv
 from scraper import *
 from vector_db import vector_db
+dotenv.load_dotenv()
 
 
 class AiAccess:
@@ -50,6 +51,7 @@ class _AiPromptGenerator:
     """
     def __init__(self):
         self.prompts = json.load(open("prompts.json", "r"))
+        self.SCRAPER = ScraperDatabaseControl()
 
     def generate_prompt(self, policy, language_level) -> str:
         """
@@ -79,9 +81,11 @@ class _AiPromptGenerator:
         content += self.prompts["language-levels"][language_level]
         content += self.prompts["chat-comp"]["chat-comp-tail"]
         closest_vector = vector_db.get_closest_neighbor(link=link, query=query)
-        content = content.format(link=link, question=query, excerpt=closest_vector)
+        if closest_vector is None:
+            self.SCRAPER.scrape_to_db(link)
+            closest_vector = vector_db.get_closest_neighbor(link=link, query=query)
 
-        print(content)
+        content = content.format(link=link, question=query, excerpt=closest_vector)
 
         return content
 

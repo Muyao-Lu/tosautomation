@@ -1,7 +1,8 @@
 import datetime
 from sqlmodel import SQLModel, Field, create_engine, select, Session
 from sqlalchemy.exc import NoResultFound
-import os
+import os, dotenv
+dotenv.load_dotenv()
 
 class IpModel(SQLModel, table=True):
     id: int | None = Field(None, primary_key=True)
