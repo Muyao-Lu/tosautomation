@@ -3,6 +3,7 @@ from fastapi.exceptions import HTTPException
 import uvicorn
 from pydantic import BaseModel
 from sqlalchemy.exc import NoResultFound
+from fastapi.middleware.cors import CORSMiddleware
 
 from ai import AiAccess
 from scraper import ScraperDatabaseControl
@@ -23,6 +24,17 @@ class Request(BaseModel):
     short: bool = False
     query : str = None
 
+origins = [
+    "http://localhost:63342/"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_methods=["POST"],
+    allow_headers=["*"]
+)
+
 
 @app.post("/{document_type}/")
 async def process_terms_of_service(document_type, request: Request):
@@ -37,22 +49,21 @@ async def process_terms_of_service(document_type, request: Request):
             else:
     
                 if request.query is not None:
-                    print("1")
+
                     try:
                         text = ai_api.chat_completion(link=request.link, query=request.query)
-                        print("2")
                         return convert_to_html(text)
                     except NoResultFound:
                         webscraper.scrape_to_db(request.link)
                         text = ai_api.chat_completion(link=request.link, query=request.query)
-                        print("3")
+
                         return convert_to_html(text)
     
                 else:
-                    print("4")
+
                     raise HTTPException(status_code=400, detail="Query parameter cannot be empty for followup questions. Please provide a query in the request body.")
         else:
-            print("5")
+
             raise HTTPException(status_code=429, detail="Too many requests. Please obey the 20s rule between requests")
     except Exception as e:
         return {"error": e}
