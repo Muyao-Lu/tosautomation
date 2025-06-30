@@ -41,7 +41,6 @@ async def process_terms_of_service(document_type, request: Request):
     try:
         if ip_validation.check_request_time_validity(request.ip):
             if document_type != "followup":
-                return "success"
                 webscraper.scrape_to_db(request.link)
                 website = webscraper.get_full_website()
                 text = ai_api.call_summarizer(short=request.short, policy=website, language_level=request.lang)
