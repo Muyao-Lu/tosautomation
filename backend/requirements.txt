@@ -8,4 +8,5 @@ langchain_text_splitters
 langchain_hyperbrowser
 psycopg2-binary
 python-dotenv
+markdown
 
