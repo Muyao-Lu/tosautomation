@@ -2,6 +2,7 @@ import markdown
 
 def convert_to_html(mk):
     converted = markdown.markdown(mk)
-    print(converted)
+    converted.replace("\n", "<br>")
+    converted.replace("\"", " ")
     return converted
 
