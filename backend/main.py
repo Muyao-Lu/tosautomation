@@ -16,7 +16,7 @@ ai_api = AiAccess()
 ip_validation = IpController()
 
 origins = [
-    "http://localhost:63342/"
+    "http://localhost:63342"
 ]
 
 app.add_middleware(
