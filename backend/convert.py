@@ -3,8 +3,7 @@ import re
 
 def convert_to_html(mk):
     converted = markdown.markdown(mk)
-    converted.replace("\n", "<br>")
-    converted.replace('"', " ")
+    converted = converted.replace("\n", "<br>")
     return converted
 
 def check_link(link):
