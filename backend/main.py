@@ -4,7 +4,6 @@ import uvicorn
 from pydantic import BaseModel
 from sqlalchemy.exc import NoResultFound
 from fastapi.middleware.cors import CORSMiddleware
-
 from ai import AiAccess
 from scraper import ScraperDatabaseControl
 from convert import convert_to_html, check_link
