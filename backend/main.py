@@ -14,6 +14,18 @@ app = FastAPI()
 webscraper = ScraperDatabaseControl()
 ai_api = AiAccess()
 ip_validation = IpController()
+
+origins = [
+    "http://localhost:63342/"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_methods=["POST"],
+    allow_headers=["*"],
+)
+
 class Request(BaseModel):
     link: str
     ip: str
