@@ -48,7 +48,7 @@ async def process_terms_of_service(document_type, request: Request):
                     return convert_to_html(text)
                 else:
                     if request.query is not None:
-                         try:
+                        try:
                             text = ai_api.chat_completion(link=request.link, query=request.query)
                             return convert_to_html(text)
                         except NoResultFound:
