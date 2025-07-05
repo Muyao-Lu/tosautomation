@@ -64,7 +64,7 @@ try:
         else:
             raise HTTPException(status_code=400, detail="Please provide a valid link")
 except Exception as e:
-    print(e)
+    return e
 
 
 if __name__ == '__main__':
