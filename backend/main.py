@@ -16,7 +16,8 @@ ai_api = AiAccess()
 ip_validation = IpController()
 
 origins = [
-    "https://muyao-lu.github.io/tosautomation"
+    "https://muyao-lu.github.io/tosautomation/",
+    "http://muyao-lu.github.io/tosautomation/"
 ]
 
 app.add_middleware(
