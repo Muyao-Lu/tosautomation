@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="form-styles.css">
+    <link rel="stylesheet" href="mobile-styles.css">
+    <title>TosAutomation</title>
+    <script type="module" src="main.js"></script>
+</head>
+<body>
+
+    <nav>
+        <h1>>TosAutomation</h1>
+        <div id="buttons">
+            <button class="navbar-button">Home</button>
+            <button class="navbar-button">About</button>
+            <button class="navbar-button">Sponsors</button>
+            <button class="navbar-button">FAQ</button>
+        </div>
+    </nav>
+
+    <main class="pre-config">
+        <img id="welcome-icon" src="avatar.png">
+        <h2 id="initial-prompt">Enter the link to a <b>privacy policy / terms of service </b> below, and watch the magic happen</h2>
+        <div id="bottom">
+
+            <form id="form" onsubmit="return false">
+
+
+                <input class="main-page" type="text" id="link-input" placeholder="Link to document" pattern="(https://|http://)(www.|)[0-9a-zA-Z\-]{1,}\.+[a-zA-Z]{2,}[a-zA-Z0-9\?\=\/\?\.\-_]*" title="Please provide a valid link (http:// or https://)">
+                <input class="main-page" id="submit" type="submit" value="Go">
+
+            </form>
+            <div id="tabs"></div>
+        </div>
+
+    </main>
+
+
+
+</body>
+</html>

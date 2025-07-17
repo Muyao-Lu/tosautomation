@@ -1,0 +1,48 @@
+
+@media only screen and (max-width: 800px), only screen and (max-height: 500px){
+    h1{
+        font-size: 24px;
+    }
+
+    .navbar-button{
+        font-size: 14px;
+        margin-right: 7.5%;
+    }
+
+    #tabs.post-config{
+        height: 5vh;
+    }
+
+    #tabs .tab-button{
+        width: 60%;
+        height: 5vh;
+
+    }
+
+    .tab-button p{
+        width: 75%;
+        padding: 0 2%;
+        height: 5vh;
+        vertical-align: middle;
+        line-height: 5vh;
+        font-size: 15px;
+    }
+
+    #add-button{
+        height: 5vh;
+        width: 5vh;
+        vertical-align: middle;
+        line-height: 5vmin;
+    }
+
+    #form.post-config{
+        height: 10vh;
+    }
+
+    .cancel{
+        width: 10%;
+        height: 4.8vh;
+        font-size: 15px;
+
+    }
+}
