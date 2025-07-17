@@ -150,7 +150,7 @@ function newAiTextbox(details){
     parent_div.className = "chat-parent";
 
     icon.className = "chat-icon";
-    icon.src = "avatar.png";
+    icon.src = "static/avatar.png";
 
     if (!(details===undefined)){
         textbox.innerHTML = details;
