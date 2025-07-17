@@ -17,7 +17,9 @@ ip_validation = IpController()
 
 origins = [
     "https://muyao-lu.github.io/tosautomation/",
-    "http://muyao-lu.github.io/tosautomation/"
+    "http://muyao-lu.github.io/tosautomation/",
+    "https://muyao-lu.github.io",
+    "http://muyao-lu.github.io"
 ]
 
 app.add_middleware(
