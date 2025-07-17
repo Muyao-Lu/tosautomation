@@ -37,7 +37,7 @@ class Ranker:
         return results[0]
 
 
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None)
 ranker = Ranker()
 
 origins = [
