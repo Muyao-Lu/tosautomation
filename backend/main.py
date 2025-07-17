@@ -9,7 +9,7 @@ from scraper import ScraperDatabaseControl
 from convert import convert_to_html, check_link
 from ip import IpController
 
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None)
 
 webscraper = ScraperDatabaseControl()
 ai_api = AiAccess()
