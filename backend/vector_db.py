@@ -1,7 +1,9 @@
 from sqlmodel import SQLModel, Field, create_engine, select, Session
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sqlalchemy.exc import NoResultFound
-import requests, os
+import requests, os, dotenv
+
+dotenv.load_dotenv()
 
 
 class VectorDatabaseModel(SQLModel, table=True):
@@ -52,11 +54,10 @@ class VectorDatabaseControl:
             }
 
             response = requests.post(self.URL, headers=headers, json=json_data)
-            print(response.json()[1])
+            print(response)
             return response.json()[1]
 
         except NoResultFound:
             return None
 
 vector_db = VectorDatabaseControl()
-vector_db.add("hello", "test.com")
