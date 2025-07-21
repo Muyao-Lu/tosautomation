@@ -52,8 +52,9 @@ class IpController:
         """
         try:
             entry = self.get_ip(ip)
+            self.update_ip(ip)
             if (datetime.datetime.now() - entry.last_call).total_seconds() > self.time_limit:
-                self.update_ip(ip)
+
                 return True
             else:
                 return False

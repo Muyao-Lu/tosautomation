@@ -15,33 +15,33 @@ class AiAccess:
         self.PROMPTER = _AiPromptGenerator()
         self.lang_level = None
 
-    def call_summarizer(self, short, policy, language_level="middle"):
+    def call_summarizer(self, link, short, language_level="middle"):
         self.lang_level = language_level
         if short:
-            prompt = self.PROMPTER.generate_short_prompt(policy=policy, language_level=language_level)
+            prompt = self.PROMPTER.generate_short_prompt(link=link, language_level=language_level)
         else:
-            prompt = self.PROMPTER.generate_prompt(policy=policy, language_level=language_level)
+            prompt = self.PROMPTER.generate_prompt(link=link, language_level=language_level)
 
         try:
             return self.MAIN_MODEL.call_ai(prompt)
-        except:
-            print("Main model failed. Falling back")
+        except Exception as e:
+            print("Main model failed because of {exception}. Falling back".format(exception=e))
             try:
                 return self.FALLBACK.call_ai(prompt)
-            except:
-                return "Something went wrong with the AI model(s). If you are a user, check your connection and then try again. If you are an administrator, check the logs"
+            except Exception as e:
+                print("Second model failed because of {exception}, after Main model failed. Try again in a bit".format(exception=e))
 
     def chat_completion(self, query, link):
         prompt = self.PROMPTER.generate_completion_prompt(query, link)
 
         try:
             return self.MAIN_MODEL.call_ai(prompt)
-        except:
-            print("Main model failed. Falling back")
+        except Exception as e:
+            print("Main model failed because of {exception}. Falling back".format(exception=e))
             try:
                 return self.FALLBACK.call_ai(prompt)
-            except:
-                return "Something went wrong with the AI model(s). If you are a user, check your connection and then try again. If you are an administrator, check the logs"
+            except Exception as e:
+                print("Second model failed because of {exception}, after Main model failed. Try again in a bit".format(exception=e))
 
 
 
@@ -53,13 +53,14 @@ class _AiPromptGenerator:
         self.prompts = json.load(open("prompts.json", "r"))
         self.SCRAPER = ScraperDatabaseControl()
 
-    def generate_prompt(self, policy, language_level) -> str:
+    def generate_prompt(self, link, language_level) -> str:
         """
         Generates initial prompt for AI models.
-        :param policy: The privacy policy to create the prompt for
+        :param link: The link of the privacy policy to create the prompt for
         :param language_level: The level of complexity that the prompt generator should ask for
         :return: Complete prompt
         """
+        policy = vector_db.get_by_link(link).document
         content = self.prompts["normal"]["default-prompts"]["default-prompt-head"]
         content += self.prompts["language-levels"][language_level]
         content += self.prompts["normal"]["default-prompts"]["default-prompt-middle"]
@@ -81,6 +82,7 @@ class _AiPromptGenerator:
         content += self.prompts["language-levels"][language_level]
         content += self.prompts["chat-comp"]["chat-comp-tail"]
         closest_vector = vector_db.get_closest_neighbor(link=link, query=query)
+
         if closest_vector is None:
             self.SCRAPER.scrape_to_db(link)
             closest_vector = vector_db.get_closest_neighbor(link=link, query=query)
@@ -90,13 +92,14 @@ class _AiPromptGenerator:
         return content
 
 
-    def generate_short_prompt(self, policy, language_level="middle") -> str:
+    def generate_short_prompt(self, link, language_level="middle") -> str:
         """
             Generates prompt for short summaries of the privacy policy.
-            :param policy: Privacy policy to generate prompt for
+            :param link: Link to privacy policy to generate prompt for
             :param language_level: The level of complexity that the prompt generator should ask for
             :return: Complete prompt for short privacy policy/tos simplification
         """
+        policy = vector_db.get_by_link(link).document
         prompt_segment = self.prompts["short"]
         content = prompt_segment["short-head"]
         content += self.prompts["language-levels"][language_level]
@@ -149,6 +152,7 @@ class _HcAiModel:
                 },
             ],
         }
+        print("called ai", json_data)
 
         response = requests.post(self.URL, headers=headers, json=json_data)
 
