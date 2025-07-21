@@ -6,7 +6,7 @@ from langchain_cohere import CohereEmbeddings
 import dotenv
 dotenv.load_dotenv()
 
-APP_MODE = "testing"
+APP_MODE = "deployment"
 
 def dot_product(vector_a, vector_b):
     assert len(vector_a) == len(vector_b)
