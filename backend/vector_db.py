@@ -27,8 +27,8 @@ class VectorDatabaseControl:
             chunk_overlap=200
         )
 
-        # self.URL = "https://tosautomation-embeddings.vercel.app"
-        self.URL = "http://127.0.0.1:8000"
+        self.URL = "https://tosautomation-embeddings.vercel.app"
+        # self.URL = "http://127.0.0.1:8000"
         SQLModel.metadata.create_all(self.engine)
 
     def add(self, item, link):
