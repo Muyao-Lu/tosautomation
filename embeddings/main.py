@@ -3,7 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 from langchain_cohere import CohereEmbeddings
+import dotenv
+dotenv.load_dotenv()
 
+APP_MODE = "testing"
 
 def dot_product(vector_a, vector_b):
     assert len(vector_a) == len(vector_b)
@@ -40,9 +43,14 @@ class Ranker:
 app = FastAPI(docs_url=None, redoc_url=None)
 ranker = Ranker()
 
-origins = [
-    "https://tosautomation-backend.vercel.app"
-]
+if APP_MODE == "testing":
+    origins = [
+        "https://tosautomation-backend.vercel.app",
+        "http://127.0.0.1:800"
+    ]
+elif APP_MODE == "deployment":
+    origins = ["https://tosautomation-backend.vercel.app"]
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -60,6 +68,7 @@ async def process_ranking_request(request: RankerModel):
     result = ranker.rank(query=request.query, documents=request.documents)
     return result
 
-if __name__ == "__main__":
-    uvicorn.run(app, port=800)
+if APP_MODE == "testing":
+    if __name__ == "__main__":
+        uvicorn.run(app, port=8000)
 
