@@ -1,5 +1,6 @@
 let keybind_normal = true;
-let saved = false;
+let saved = true;
+const state = "testing"
 
 /* Initializes the chat for the first time */
 function initializeChat(){
@@ -88,7 +89,6 @@ function clearChatFromScreen(){
     const elements = document.getElementsByClassName("chat-parent");
     const l = elements.length
     for (let i = 0; i<l; i++){
-        console.log(elements);
         elements[0].remove();
     }
 }
@@ -182,7 +182,7 @@ function newUserTextbox(details){
 }
 
 function getAjaxSummary(link){
-
+    saved = false;
     const data = JSON.stringify({
       'link': link,
       'ip': getIp(),
@@ -191,9 +191,17 @@ function getAjaxSummary(link){
       'query': 'string'
     });
 
+    let endpoint = ""
+    if (state=="testing"){
+        endpoint = "http://127.0.0.1:800/a/";
+    }
+    else{
+        endpoint = "https://tosautomation-backend.vercel.app/a/";
+    }
+
 
     let request = new XMLHttpRequest();
-    request.open('POST', 'https://tosautomation-backend.vercel.app/a/');
+    request.open('POST', endpoint);
     request.setRequestHeader('accept', 'application/json');
     request.setRequestHeader('Content-Type', 'application/json');
 
@@ -201,14 +209,15 @@ function getAjaxSummary(link){
         if (!(this.readyState == 4)){
             localStorage.setItem(link, "Loading...");
             loadChatFromStorage(sessionStorage.getItem("current_open"));
-            saved = false;
+
         }
         else if (this.readyState == 4){
-            localStorage.setItem(link, this.responseText.replace(/"/g, ""));
+            localStorage.setItem(link, this.responseText.replace(/"/g, "'"));
             if (sessionStorage.getItem("current_open") == link){
                 loadChatFromStorage(sessionStorage.getItem("current_open"));
-                saved = true;
+
             }
+            saved = true;
 
         }
     }
@@ -227,20 +236,31 @@ function getAjaxFollowup(link, query){
       'short': false,
       'query': query
     });
+    saved = false
 
 
     let request = new XMLHttpRequest();
-    request.open('POST', 'https://tosautomation-backend.vercel.app/followup/');
+    let endpoint = ""
+
+    if (state=="testing"){
+        endpoint = "http://127.0.0.1:800/followup/";
+    }
+    else{
+        endpoint = "https://tosautomation-backend.vercel.app/followup/";
+    }
+
+    request.open('POST', endpoint);
     request.setRequestHeader('accept', 'application/json');
     request.setRequestHeader('Content-Type', 'application/json');
 
     request.onreadystatechange = function (){
         if (!(this.readyState == 4)){
-            saved = false
+
         }
         else if (this.readyState == 4){
             const old_storage = localStorage.getItem(link);
-            const new_storage = old_storage + "|" + this.responseText;
+            console.log(this.responseText);
+            const new_storage = old_storage + "|" + this.responseText.replace(/"/g, "");
             localStorage.setItem(link, new_storage);
 
             if (sessionStorage.getItem("current_open") == link){
@@ -255,8 +275,6 @@ function getAjaxFollowup(link, query){
 
 function loadChatFromStorage(link){
     clearChatFromScreen();
-
-    console.log(link);
 
     const chat_details = localStorage.getItem(link);
     const processed = chat_details.split("|");
@@ -334,7 +352,6 @@ function acceptNewTab(link){
         cancelPopup();
         for (let item of document.getElementsByClassName("tab-button")){
 
-            console.log(item.innerHTML, link);
             if (!(item.dataset.link_for==link)){
                 item.id = "";
             }
@@ -354,7 +371,6 @@ function updateCurrentOpenName(name){
 
 function initialBind(){
     window.addEventListener("beforeunload", function(event){preventUnload(event)})
-    setInterval(function(){console.log(sessionStorage.getItem("current_open"))}, 100)
     if (localStorage.length===0){
         document.getElementsByTagName("form")[0].addEventListener("submit", initializeChat);
 
@@ -405,8 +421,6 @@ function initiateDeleteChat(link){
 function deleteChat(link){
     localStorage.removeItem(link);
     location.reload();
-
-
 }
 
 
