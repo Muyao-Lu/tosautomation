@@ -3,3 +3,4 @@ fastapi~=0.115.12
 langchain_cohere~=0.4.4
 langchain_community
 pydantic
+cohere==5.15.0
