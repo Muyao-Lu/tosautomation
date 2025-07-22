@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/form-styles.css">
     <link rel="stylesheet" href="styles/mobile-styles.css">
+    <link rel="stylesheet" href="styles/settings-styles.css">
     <title>TosAutomation</title>
     <script type="module" src="scripts/main.js"></script>
 </head>
@@ -26,7 +27,7 @@
         <h2 id="initial-prompt">Enter the link to a <b>privacy policy / terms of service </b> below, and watch the magic happen</h2>
         <div id="bottom">
 
-            <form id="form" onsubmit="return false">
+            <form id="chat-input-form" onsubmit="return false">
 
 
                 <input class="main-page" type="text" id="link-input" placeholder="Link to document" pattern="(https://|http://)(www.|)[0-9a-zA-Z\-]{1,}\.+[a-zA-Z]{2,}[a-zA-Z0-9\?\=\/\?\.\-_]*" title="Please provide a valid link (http:// or https://)">
@@ -37,6 +38,42 @@
         </div>
 
     </main>
+    <aside class="closed">
+        <h1>Settings</h1>
+        <form id="settings-form">
+            <h2>Language Difficulty</h2>
+            <p>How advanced should the vocabulary be?</p>
+
+            <label for="elementary">Elementary School Level</label>
+            <input id="elementary" type="radio" name="language-level">
+            <br>
+
+            <label for="middle">Middle School Level</label>
+            <input id="middle" type="radio" name="language-level" checked>
+            <br>
+
+            <label for="high">High School Level</label>
+            <input id="high" type="radio" name="language-level">
+            <br>
+
+            <label for="adult">Adult Level</label>
+            <input id="adult" type="radio" name="language-level">
+            <br>
+
+            <label for="monkey">Monkey</label>
+            <input id="monkey" type="radio" name="language-level">
+            <br>
+
+            <h2>Summary Length</h2>
+            <p>How long  should the summary be</p>
+            <label for="normal" >Normal Length</label>
+            <input id="normal" type="radio" name="length" checked>
+            <br>
+            <label for="short">Short</label>
+            <input id="short" type="radio" name="length">
+        </form>
+
+    </aside>
 
 
 
