@@ -50,6 +50,8 @@ function configureTabs(){
 }
 
 function deleteInitialWelcome(link){
+    const body = document.getElementsByTagName("body")[0];
+
     deleteItemById("welcome-icon");
     deleteItemById("initial-prompt");
     deleteItemById("submit");
@@ -59,7 +61,7 @@ function deleteInitialWelcome(link){
     name_header.innerHTML = link;
     name_header.id = "name-header";
 
-    let form = document.getElementById("form");
+    let form = document.getElementById("chat-input-form");
     let main = document.getElementsByTagName("main")[0];
 
     main.className = "post-config"
@@ -73,8 +75,15 @@ function deleteInitialWelcome(link){
     new_textinput.placeholder = "Anything else to ask?";
     new_textinput.className = "main-page";
 
+    let settings_button = document.createElement("img");
+    settings_button.id = "settings-button";
+    settings_button.src = "../static/settings.png";
+    settings_button.addEventListener("click", toggleAside);
+
     main.prepend(name_header);
     form.appendChild(new_textinput);
+    body.appendChild(settings_button);
+
 }
 
 /* Creates a new chat */
@@ -372,7 +381,7 @@ function updateCurrentOpenName(name){
 function initialBind(){
     window.addEventListener("beforeunload", function(event){preventUnload(event)})
     if (localStorage.length===0){
-        document.getElementsByTagName("form")[0].addEventListener("submit", initializeChat);
+        document.getElementById("chat-input-form")[0].addEventListener("submit", initializeChat);
 
     }
     else{
@@ -430,6 +439,16 @@ function preventUnload(event){
     }
 
 
+}
+
+function toggleAside(){
+    let aside = document.getElementsByTagName("aside")[0];
+    if (aside.className == "open"){
+        aside.className = "closed";
+    }
+    else if (aside.className == "closed"){
+        aside.className = "open";
+    }
 }
 
 
