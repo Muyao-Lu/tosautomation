@@ -14,8 +14,8 @@ nav{
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 101;
     backdrop-filter: blur(2000px);
+    z-index: 1;
 }
 
 h1, h2, h3{
@@ -128,12 +128,12 @@ main.post-config{
     margin-bottom: 30vmin;
 }
 
-#settings{
+#settings-button{
     position: fixed;
-    width: 5vmin;
-    height: 5vmin;
-    top: 0;
-    right: 0;
+    width: 7.5vmin;
+    height: 7.5vmin;
+    top: 5vmin;
+    right: 7.5vmin;
 }
 
 #name-header{
@@ -208,8 +208,8 @@ main.post-config{
     bottom: 0;
     width: 100%;
     background-color: rgba(0, 0, 0, 0.1);
-    z-index: 100;
     backdrop-filter: blur(200px);
+    z-index: 2;
 }
 
 #bg{
@@ -219,7 +219,6 @@ main.post-config{
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 102;
     backdrop-filter: blur(2px);
 }
 
@@ -235,7 +234,6 @@ main.post-config{
     background-color: rgba(0, 0, 0, 0.1);
 
     position: fixed;
-    z-index: 103;
     backdrop-filter: blur(20px);
 
 }
@@ -256,8 +254,11 @@ h3{
 }
 
 .warning{
-    color: rgb(150, 0, 0);
+    border: 2px solid white;
+    padding: 2%;
+    background-color: rgba(0, 0, 0, 0.9);
 }
+
 body::-webkit-scrollbar{
     display: none;
 }

@@ -45,4 +45,9 @@
         font-size: 15px;
 
     }
+
+    aside{
+        width: 80% !important;
+        padding: 10% !important;
+    }
 }

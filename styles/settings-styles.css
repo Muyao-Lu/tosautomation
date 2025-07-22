@@ -1,0 +1,112 @@
+#settings-button{
+    position: fixed;
+    width: 4vmin;
+    height: 4vmin;
+    top: 2vmin;
+    right: 2vmin;
+    z-index: 111;
+}
+
+@keyframes open{
+    from{
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to{
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes close{
+    from{
+        transform: translateX(0%);
+        opacity: 1;
+    }
+    to{
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+@keyframes check{
+    from{
+        background-color: rgba(0, 0, 0, 0);
+    }
+    to{
+        background-color: rgba(56, 182, 255, 0.75);
+    }
+}
+
+aside{
+
+    background-color: rgba(0, 0, 0, 0.2);
+    width: max(20%, 200px);
+    height: 100%;
+    padding: 2%;
+    position: fixed;
+    top: 0;
+    right: 0;
+    backdrop-filter: blur(50px);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 110;
+
+}
+
+aside.closed{
+    animation: close 0.2s;
+    animation-fill-mode: forwards;
+    animation-direction: normal;
+
+}
+
+aside.open{
+    animation: open 0.2s;
+    animation-fill-mode: forwards;
+    animation-direction: normal;
+}
+
+aside h1{
+    font-family: monospace;
+    font-size: max(36px, 3vmin);
+}
+
+aside h2{
+    font-family: monospace;
+    font-size: max(24px, 2vmin);
+    text-shadow: none;
+}
+
+aside p{
+    border: 1px rgb(56, 182, 255) solid;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 10px;
+
+}
+
+aside p, aside label{
+    font-size: max(1.5vmin, 12px);
+    color: white;
+    text-align: center;
+
+}
+
+aside label{
+    margin-left: 20%;
+}
+
+aside input[type="radio"]{
+    all: initial;
+    width: 10px;
+    height: 10px;
+    border: 2px solid white;
+    border-radius: 100%;
+    float: right;
+    margin-right: 10%;
+}
+
+aside input:checked{
+
+    animation: check 0.3s;
+    animation-fill-mode: forwards;
+}
