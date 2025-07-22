@@ -1,6 +1,6 @@
 let keybind_normal = true;
 let saved = true;
-const state = "testing"
+const state = "deployment"
 
 /* Initializes the chat for the first time */
 function initializeChat(){
