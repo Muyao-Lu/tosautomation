@@ -4,3 +4,4 @@ langchain_cohere~=0.4.4
 langchain_community
 pydantic
 cohere==5.15.0
+requests
