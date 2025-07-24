@@ -16,6 +16,8 @@
 #prompt-input.main-page{
     display: block;
     height: 80%;
+    margin-top: 2.5%;
+    margin-bottom: 2.5%;
 }
 
 /* Link Input */

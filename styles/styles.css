@@ -37,12 +37,7 @@ h2{
     text-shadow: 0px 0px 10px rgba(255, 255, 255, 1);
 }
 
-main.pre-config{
-    margin: auto;
-}
-
-main.post-config{
-    margin: auto;
+main{
     margin-top: 25vmin;
 }
 
@@ -220,6 +215,7 @@ main.post-config{
     top: 0;
     left: 0;
     backdrop-filter: blur(2px);
+    z-index: 1000
 }
 
 #prompt-box{
@@ -235,6 +231,7 @@ main.post-config{
 
     position: fixed;
     backdrop-filter: blur(20px);
+    z-index: 1001;
 
 }
 
