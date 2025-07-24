@@ -1,9 +1,14 @@
 let keybind_normal = true;
 let saved = true;
-const state = "deployment"
+const state = "deployment";
+
+let lang = "middle";
+let short = false;
+
 
 /* Initializes the chat for the first time */
 function initializeChat(){
+    console.log("initialized")
     const link = document.getElementById("link-input").value;
     deleteInitialWelcome(link);
     updateCurrentOpenName(link);
@@ -75,14 +80,9 @@ function deleteInitialWelcome(link){
     new_textinput.placeholder = "Anything else to ask?";
     new_textinput.className = "main-page";
 
-    let settings_button = document.createElement("img");
-    settings_button.id = "settings-button";
-    settings_button.src = "../static/settings.png";
-    settings_button.addEventListener("click", toggleAside);
 
     main.prepend(name_header);
     form.appendChild(new_textinput);
-    body.appendChild(settings_button);
 
 }
 
@@ -191,12 +191,13 @@ function newUserTextbox(details){
 }
 
 function getAjaxSummary(link){
+    setRequestConfigs();
     saved = false;
     const data = JSON.stringify({
       'link': link,
       'ip': getIp(),
-      'lang': 'middle',
-      'short': false,
+      'lang': lang,
+      'short': short,
       'query': 'string'
     });
 
@@ -238,11 +239,13 @@ function getAjaxSummary(link){
 
 
 function getAjaxFollowup(link, query){
+    setRequestConfigs();
+    console.log(lang);
     const data = JSON.stringify({
       'link': link,
       'ip': getIp(),
-      'lang': 'middle',
-      'short': false,
+      'lang': lang,
+      'short': short,
       'query': query
     });
     saved = false
@@ -379,9 +382,10 @@ function updateCurrentOpenName(name){
 }
 
 function initialBind(){
-    window.addEventListener("beforeunload", function(event){preventUnload(event)})
-    if (localStorage.length===0){
-        document.getElementById("chat-input-form")[0].addEventListener("submit", initializeChat);
+    window.addEventListener("beforeunload", function(event){preventUnload(event)});
+    document.getElementById("settings-button").addEventListener("click", toggleAside);
+    if (localStorage.length==0){
+        document.getElementById("chat-input-form").addEventListener("submit", initializeChat);
 
     }
     else{
@@ -448,6 +452,31 @@ function toggleAside(){
     }
     else if (aside.className == "closed"){
         aside.className = "open";
+    }
+}
+
+function setRequestConfigs(){
+    short = document.getElementById("short").checked;
+
+    if (document.getElementById("elementary").checked){
+
+        lang = "elementary";
+    }
+    else if (document.getElementById("middle").checked){
+
+        lang = "middle";
+    }
+    else if (document.getElementById("high").checked){
+
+        lang = "high";
+    }
+    else if (document.getElementById("adult").checked){
+
+        lang = "adult";
+    }
+    else if (document.getElementById("monkey").checked){
+
+        lang = "monkey";
     }
 }
 
