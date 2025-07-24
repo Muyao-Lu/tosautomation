@@ -47,12 +47,14 @@ app.add_middleware(
 class Request(BaseModel):
     link: str
     ip: str
-    lang: str = "middle"
-    short: bool = False
+    lang: str
+    short: bool
     query : str = None
 
 @app.post("/{document_type}/")
 async def process_terms_of_service(document_type, request: Request):
+    print("Request initiated with the following info:", "\nLink:", request.link, "\nIp:",
+          request.ip, "\nLang:", request.lang, "\nShort:", request.short, "\nQuery:", request.query)
     try:
         if check_link(request.link):
             if ip_validation.check_request_time_validity(request.ip):
@@ -66,15 +68,14 @@ async def process_terms_of_service(document_type, request: Request):
                     except Exception as e:
                         print("Error", e)
 
-                    print(text)
                     return convert_to_html(text)
                 else:
                     if request.query is not None:
                         try:
-                            text = ai_api.chat_completion(link=request.link, query=request.query)
+                            text = ai_api.chat_completion(short=request.short, link=request.link, query=request.query, language_level=request.lang)
                         except NoResultFound:
                             webscraper.scrape_to_db(request.link)
-                            text = ai_api.chat_completion(link=request.link, query=request.query)
+                            text = ai_api.chat_completion(short=request.short, link=request.link, query=request.query, language_level=request.lang)
                         print(text)
                         return convert_to_html(text)
         

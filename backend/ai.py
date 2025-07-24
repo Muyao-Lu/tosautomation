@@ -31,8 +31,11 @@ class AiAccess:
             except Exception as e:
                 print("Second model failed because of {exception}, after Main model failed. Try again in a bit".format(exception=e))
 
-    def chat_completion(self, query, link):
-        prompt = self.PROMPTER.generate_completion_prompt(query, link)
+    def chat_completion(self, short, query, link, language_level="middle"):
+        if short:
+            prompt = self.PROMPTER.generate_short_completion_prompt(query, link, language_level)
+        else:
+            prompt = self.PROMPTER.generate_completion_prompt(query, link, language_level)
 
         try:
             return self.MAIN_MODEL.call_ai(prompt)
@@ -61,9 +64,8 @@ class _AiPromptGenerator:
         :return: Complete prompt
         """
         policy = vector_db.get_by_link(link).document
-        content = self.prompts["normal"]["default-prompts"]["default-prompt-head"]
-        content += self.prompts["language-levels"][language_level]
-        content += self.prompts["normal"]["default-prompts"]["default-prompt-middle"]
+        content = self.prompts["language-levels"][language_level]
+        content += self.prompts["normal"]["default-prompts"]["default-prompt-head"]
         content += self.prompts["normal"]["default-prompts"]["default-prompt-tail"]
 
         content = content.format(policy=policy)
@@ -78,9 +80,28 @@ class _AiPromptGenerator:
             :param language_level: The level of complexity that the prompt generator should ask for
             :return: Complete prompt for chat completions
         """
-        content = self.prompts["chat-comp"]["chat-comp-head"]
-        content += self.prompts["language-levels"][language_level]
-        content += self.prompts["chat-comp"]["chat-comp-tail"]
+        content = self.prompts["language-levels"][language_level]
+        content += self.prompts["chat-comp"]["chat-comp"]
+        closest_vector = vector_db.get_closest_neighbor(link=link, query=query)
+
+        if closest_vector is None:
+            self.SCRAPER.scrape_to_db(link)
+            closest_vector = vector_db.get_closest_neighbor(link=link, query=query)
+
+        content = content.format(link=link, question=query, excerpt=closest_vector)
+
+        return content
+
+    def generate_short_completion_prompt(self, query, link, language_level="middle") -> str:
+        """
+            Generates prompt for short chat-completions (followup questions) for the AI model.
+            :param query: The query (question that the user asked)
+            :param link: Link where the privacy policy originated from
+            :param language_level: The level of complexity that the prompt generator should ask for
+            :return: Complete prompt for chat completions
+        """
+        content = self.prompts["language-levels"][language_level]
+        content += self.prompts["short-chat-comp"]["short-chat-comp"]
         closest_vector = vector_db.get_closest_neighbor(link=link, query=query)
 
         if closest_vector is None:
@@ -100,10 +121,10 @@ class _AiPromptGenerator:
             :return: Complete prompt for short privacy policy/tos simplification
         """
         policy = vector_db.get_by_link(link).document
-        prompt_segment = self.prompts["short"]
-        content = prompt_segment["short-head"]
-        content += self.prompts["language-levels"][language_level]
-        content += prompt_segment["short-tail"]
+        content = self.prompts["language-levels"][language_level]
+        content += self.prompts["short"]["short-head"]
+
+        content += self.prompts["short"]["short-tail"]
         content = content.format(policy=policy)
         return content
 
