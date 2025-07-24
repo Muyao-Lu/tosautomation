@@ -66,11 +66,8 @@ class VectorDatabaseControl:
             }
 
             response = requests.post(self.URL, headers=headers, json=json_data)
-            print(response)
-            if response != "No result exceeded limit":
-                return response.json()[1]
-            else:
-                return item
+            print("Request responded with", response.json())
+            return response.json()
 
         except NoResultFound:
             return None
