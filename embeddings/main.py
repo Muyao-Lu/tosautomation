@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
-from langchain_cohere import CohereEmbeddings
 import dotenv, requests
 from math import sqrt
+import cohere
 dotenv.load_dotenv()
 
 APP_MODE = "deployment"
@@ -32,25 +32,41 @@ class Ranker:
             :param min_confidance: Link to privacy policy to generate prompt for
             :return: Document if distance for top element is lesser than confidance. Segment of document if it is greater
         """
-        self.embedder = CohereEmbeddings(model="embed-english-light-v3.0")
+        self.client = cohere.ClientV2()
         self.rewriter = Rewriter()
         self.MIN_CONFIDANCE = min_confidance
 
     def rank(self, query, documents, origin):
 
-        embedded_text_segments = self.embedder.embed_documents(documents)
-        query_enhanced = self.embedder.embed_query(self.rewriter.call_ai(query, origin=origin))
-        results = zip(embedded_text_segments, documents)
+        query_enhanced = self.rewriter.call_ai(query, origin=origin)
+        results = self.client.rerank(
+            model="rerank-v3.5",
+            query=query_enhanced,
+            documents=documents,
+            top_n=5,
+        )
 
-        results = map(lambda x: [dot_product(x[0], query_enhanced)/(norm(x[0]) * norm(query_enhanced)), x[1]], iter(results))
-        results = sorted((item for item in results), key = lambda x: x[0], reverse=True)
-        for item in results:
-            print(item)
 
-        if results[0][0] > self.MIN_CONFIDANCE:
-            return results[0]
+        results = dict(results)
+        print(results["results"][0])
+
+        first_item_data = dict(results["results"][0])
+        results_text = documents[first_item_data["index"]]
+
+
+
+
+        if float(first_item_data["relevance_score"]) > self.MIN_CONFIDANCE:
+            return results_text
         else:
-            return "No result exceeded limit"
+            """""
+                Will turn into a lambda if you believe hard enough
+            """""
+            l = []
+            for item in results["results"]:
+                l.append(documents[dict(item)["index"]])
+
+            return l
 
 class Rewriter:
     def __init__(self):
@@ -108,6 +124,7 @@ class RankerModel(BaseModel):
 @app.post("/")
 async def process_ranking_request(request: RankerModel):
     result = ranker.rank(query=request.query, documents=request.documents, origin=request.origin)
+    print("returning", result)
     return result
 
 if APP_MODE == "testing":
