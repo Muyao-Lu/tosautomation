@@ -1,7 +1,8 @@
 from openai import OpenAI
-import json, requests, os, dotenv
+import json, requests, tiktoken, time, convert
 from scraper import *
 from vector_db import vector_db
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 dotenv.load_dotenv()
 
 
@@ -15,6 +16,8 @@ class AiAccess:
         self.PROMPTER = _AiPromptGenerator()
         self.lang_level = None
 
+
+
     def call_summarizer(self, link, short, language_level="middle"):
         self.lang_level = language_level
         if short:
@@ -22,6 +25,7 @@ class AiAccess:
         else:
             prompt = self.PROMPTER.generate_prompt(link=link, language_level=language_level)
 
+        print("prompt = ", prompt)
         try:
             return self.MAIN_MODEL.call_ai(prompt)
         except Exception as e:
@@ -47,6 +51,26 @@ class AiAccess:
                 print("Second model failed because of {exception}, after Main model failed. Try again in a bit".format(exception=e))
 
 
+class AiChunker:
+    def __init__(self):
+        self.MAX_CHUNK_SIZE = 5000
+        self.text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+            chunk_size=self.MAX_CHUNK_SIZE,
+            chunk_overlap=self.MAX_CHUNK_SIZE * 0.1
+        )
+        self.ai_access = _HcAiModel()
+
+        self.TOKEN_COUNTER = tiktoken.get_encoding("cl100k_base")
+
+    def split_and_process(self, document):
+        chunks = self.text_splitter.split_text(document)
+
+        chunks_processed = []
+        for chunk in chunks:
+            chunks_processed.append(convert.remove_think(self.ai_access.call_ai("Please reformat this excerpt to only contain key points. "
+                                                           "Denote separate sections with headers. \n ### Excerpt: {excerpt}".format(excerpt=chunk))))
+
+        return chunks_processed
 
 class _AiPromptGenerator:
     """
@@ -55,6 +79,9 @@ class _AiPromptGenerator:
     def __init__(self):
         self.prompts = json.load(open("prompts.json", "r"))
         self.SCRAPER = ScraperDatabaseControl()
+        self.MODEL_TOKEN_LIMIT = 100000
+        self.chunker = AiChunker()
+        self.TOKEN_COUNTER = tiktoken.get_encoding("cl100k_base")
 
     def generate_prompt(self, link, language_level) -> str:
         """
@@ -64,6 +91,13 @@ class _AiPromptGenerator:
         :return: Complete prompt
         """
         policy = vector_db.get_by_link(link).document
+
+        if len(self.TOKEN_COUNTER.encode(policy)) > self.MODEL_TOKEN_LIMIT:
+            chunks = self.chunker.split_and_process(policy)
+            policy = ""
+            for chunk in chunks:
+                policy += chunk + "\n\n"
+
         content = self.prompts["language-levels"][language_level]
         content += self.prompts["normal"]["default-prompts"]["default-prompt-head"]
         content += self.prompts["normal"]["default-prompts"]["default-prompt-tail"]
@@ -121,6 +155,13 @@ class _AiPromptGenerator:
             :return: Complete prompt for short privacy policy/tos simplification
         """
         policy = vector_db.get_by_link(link).document
+
+        if len(self.TOKEN_COUNTER.encode(policy)) > self.MODEL_TOKEN_LIMIT:
+            chunks = self.chunker.split_and_process(policy)
+            policy = ""
+            for chunk in chunks:
+                policy += chunk + "\n\n"
+
         content = self.prompts["language-levels"][language_level]
         content += self.prompts["short"]["short-head"]
 
@@ -160,9 +201,13 @@ class _HcAiModel:
 
     def __init__(self):
         self.URL = "https://ai.hackclub.com/chat/completions"
-    def call_ai(self, prompt) -> str:
+
+    def call_ai(self, prompt, max_retries=5) -> str:
+
+        retries = 0
         headers = {
             'Content-Type': 'application/json',
+            "Connection": "close"
         }
 
         json_data = {
@@ -173,9 +218,21 @@ class _HcAiModel:
                 },
             ],
         }
-        print("called ai", json_data)
+        print("tried")
 
-        response = requests.post(self.URL, headers=headers, json=json_data)
+        while retries <= max_retries:
+            with requests.session() as s:
+                try:
+                    response = s.post(self.URL, headers=headers, json=json_data)
+                    s.close()
+                    return response.json()["choices"][0]["message"]["content"]
+                except requests.exceptions.SSLError:
+                    s.close()
+                    time.sleep(3)
+                    retries += 1
+        else:
+            print("Error! AAWhjshdfjashj")
 
-        return response.json()["choices"][0]["message"]["content"]
+
+
 

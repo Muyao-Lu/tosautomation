@@ -66,7 +66,7 @@ async def process_terms_of_service(document_type, request: Request):
                         webscraper.scrape_to_db(request.link)
                         text = ai_api.call_summarizer(link=request.link, short=request.short, language_level=request.lang)
                     except Exception as e:
-                        print("Error", e)
+                        print(e)
 
                     return convert_to_html(text)
                 else:
@@ -76,7 +76,6 @@ async def process_terms_of_service(document_type, request: Request):
                         except NoResultFound:
                             webscraper.scrape_to_db(request.link)
                             text = ai_api.chat_completion(short=request.short, link=request.link, query=request.query, language_level=request.lang)
-                        print(text)
                         return convert_to_html(text)
         
                     else:

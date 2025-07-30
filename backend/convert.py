@@ -1,17 +1,44 @@
-import markdown
-import re
+import markdown, re, urllib.parse
+
+valid_url_schemes =  ["https", "http"]
+valid_url_special_chars = ["-", "_", "."]
 
 def convert_to_html(mk):
-
-    converted = markdown.markdown(mk)
+    print("mk", mk)
+    converted = remove_think(mk)
+    converted = markdown.markdown(converted)
     converted = converted.replace("\n", "<br>")
     converted = converted.replace('"', "'")
+
 
     return converted
 
 def check_link(link):
-    link_pattern = r"(https:\/\/|http:\/\/)(www.|)[0-9a-zA-Z\-]{1,}\.+[a-zA-Z]{2,}[a-zA-Z0-9\?\=\/\?\.\-]*" # Regex. AAAAAAHHHH
-    return re.search(string=link, pattern=link_pattern) is not None
+    parsed_link = urllib.parse.urlparse(link)
+
+    if parsed_link.scheme in valid_url_schemes:
+        pass
+    else:
+        return False
+
+    if len(parsed_link.netloc) > 0:
+        for char in parsed_link.netloc:
+            if char.isalnum() or (char in valid_url_special_chars):
+                continue
+            else:
+                return False
+    else:
+        return False
+
+    return True
+
+
+def remove_think(string):
+    think_pattern = r"<think>(.|\n)*?</think>"
+    new_string = re.sub(think_pattern, "", string)
+
+    return new_string
+
 
 
 
