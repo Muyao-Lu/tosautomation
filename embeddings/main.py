@@ -3,26 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 import dotenv, requests
-from math import sqrt
 import cohere
 dotenv.load_dotenv()
 
 APP_MODE = "deployment"
-
-def dot_product(vector_a, vector_b):
-    assert len(vector_a) == len(vector_b)
-    r = 0
-    for i in range(len(vector_a)):
-        r += vector_a[i] * vector_b[i]
-
-    return r
-
-def norm(vector):
-    r = 0
-    for item in vector:
-        r += item**2
-
-    return sqrt(r)
 
 class Ranker:
 
@@ -92,8 +76,6 @@ class Rewriter:
         }
 
         response = requests.post(self.URL, headers=headers, json=json_data)
-        print(response.json()["choices"][0]["message"]["content"])
-
         return response.json()["choices"][0]["message"]["content"]
 
 
