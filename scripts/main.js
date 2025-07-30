@@ -8,7 +8,6 @@ let short = false;
 
 /* Initializes the chat for the first time */
 function initializeChat(){
-    console.log("initialized")
     const link = document.getElementById("link-input").value;
     deleteInitialWelcome(link);
     updateCurrentOpenName(link);
@@ -16,6 +15,8 @@ function initializeChat(){
     configureTabs();
     newChat(link);
     addTab(link);
+    document.getElementsByClassName("tab-button")[0].id = "selected";
+
 
 
 
@@ -63,7 +64,7 @@ function deleteInitialWelcome(link){
     deleteItemById("link-input");
 
     let name_header = document.createElement("h2");
-    name_header.innerHTML = link;
+    name_header.textContent = link;
     name_header.id = "name-header";
 
     let form = document.getElementById("chat-input-form");
@@ -115,7 +116,7 @@ function addTab(link){
 
 
     tab_button.innerHTML = "<p>" + link + "</p>";
-    tab_button.addEventListener("click", function(){switchTabs(link, tab_button)});
+    tab_button.addEventListener("click", function(){switchTabs(link, tab_button);});
     tab_button.className = "tab-button";
     tab_button.dataset.link_for = link;
 
@@ -183,7 +184,7 @@ function newUserTextbox(details){
 
 
     if (!(details===undefined)){
-        textbox.innerHTML = details;
+        textbox.textContent = details;
     }
 
     parent_div.appendChild(textbox);
@@ -222,7 +223,7 @@ function getAjaxSummary(link){
 
         }
         else if (this.readyState == 4){
-            localStorage.setItem(link, this.responseText.replace(/"/g, "'"));
+            localStorage.setItem(link, this.responseText.replace(/"/g, ""));
             if (sessionStorage.getItem("current_open") == link){
                 loadChatFromStorage(sessionStorage.getItem("current_open"));
 
@@ -314,7 +315,7 @@ function promptNewTab(link){
 
     box.innerHTML = `<h2 id="prompt-h2">Enter a new link to simplify and then click Go!</h2>
                      <form onsubmit="return false" id="popup">
-                        <input id="link-input" class="mini-popup" type="text" placeholder="Link to document" pattern="(https?:\\/\\/)(www\\.)?[a-zA-Z0-9\\-]+\\.[a-zA-Z]{2,}[a-zA-Z0-9\\/\\?=_.\\-]*" title="Please provide a valid link (http:// or https://)">
+                        <input id="link-input" class="mini-popup" type="text" placeholder="Link to document" pattern="https?:\\/\\/(www\\.)?[0-9a-zA-Z\\-]+\\.[a-zA-Z]{2,}([\\/\\w\\?\\=\\.\\-&]*)?" title="Please provide a valid link (http:// or https://)">
                         <input class="mini-popup" id="submit" type="submit" value="Go!">
                         <button class="mini-popup" id="cancel" type="button">Cancel</button>
                      </form>`
@@ -335,11 +336,12 @@ function cancelPopup(){
 }
 
 function createChatsFromStorage(){
-    const link = localStorage.key(0)
+    const link = localStorage.key(2)
     deleteInitialWelcome(link);
     configureTabs();
 
-    for (let i = 0; i<localStorage.length; i++){
+    for (let i = 2; i<localStorage.length; i++){
+        console.log(localStorage.key(i))
         addTab(localStorage.key(i));
     }
 
@@ -357,7 +359,13 @@ function acceptNewTab(link){
         addTab(link);
 
         const tabs = document.getElementsByClassName("tab-button");
+
+        for (let item of document.getElementsByClassName("tab-button")){
+            item.id = ""
+        }
+
         tabs[tabs.length - 1].id = "selected";
+
     }
     else{
         loadChatFromStorage(link);
@@ -373,25 +381,32 @@ function acceptNewTab(link){
         }
 
     }
+    updateCurrentOpenName(link);
 
 }
 
 function updateCurrentOpenName(name){
     sessionStorage.setItem("current_open", name)
-    document.getElementById("name-header").innerHTML = name;
+    document.getElementById("name-header").textContent = name;
 }
 
 function initialBind(){
     window.addEventListener("beforeunload", function(event){preventUnload(event)});
     document.getElementById("settings-button").addEventListener("click", toggleAside);
-    if (localStorage.length==0){
+    configureForm();
+    if (localStorage.length <= 2){
         document.getElementById("chat-input-form").addEventListener("submit", initializeChat);
+        if (localStorage.length == 0){
+            localStorage.setItem("lang", "middle");
+            localStorage.setItem("short", "false");
+        }
 
     }
     else{
         createChatsFromStorage();
         document.addEventListener('keydown', submitFollowup);
     }
+
 
 
 }
@@ -456,28 +471,29 @@ function toggleAside(){
 }
 
 function setRequestConfigs(){
-    short = document.getElementById("short").checked;
 
-    if (document.getElementById("elementary").checked){
+    lang = localStorage.getItem("lang");
+    short = localStorage.getItem("short") === "true";
+    console.log(short);
+}
 
-        lang = "elementary";
+function configureForm(){
+    if (localStorage.length >= 2){
+        for (let item of document.getElementsByClassName("lang-buttons")){
+
+            if (localStorage.getItem("lang") == item.id){
+                item.checked = true
+            }
+        }
+
+        if (localStorage.getItem("short") === "true"){
+            document.getElementById("short").checked = true
+        }
+        else{
+            document.getElementById("normal").checked = true
+        }
     }
-    else if (document.getElementById("middle").checked){
 
-        lang = "middle";
-    }
-    else if (document.getElementById("high").checked){
-
-        lang = "high";
-    }
-    else if (document.getElementById("adult").checked){
-
-        lang = "adult";
-    }
-    else if (document.getElementById("monkey").checked){
-
-        lang = "monkey";
-    }
 }
 
 
