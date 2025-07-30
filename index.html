@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/form-styles.css">
     <link rel="stylesheet" href="styles/mobile-styles.css">
@@ -11,7 +11,7 @@
     <script type="module" src="scripts/main.js"></script>
 </head>
 <body>
-    <img src="static/settings.png" id="settings-button">
+    <img src="../static/settings.png" id="settings-button">
     <nav>
         <h1>>TosAutomation</h1>
         <div id="buttons">
@@ -31,7 +31,7 @@
             <form id="chat-input-form" onsubmit="return false">
 
 
-                <input class="main-page" type="text" id="link-input" placeholder="Link to document" pattern="(https://|http://)(www.|)[0-9a-zA-Z\-]{1,}\.+[a-zA-Z]{2,}[a-zA-Z0-9\?\=\/\?\.\-_]*" title="Please provide a valid link (http:// or https://)">
+                <input class="main-page" type="text" id="link-input" placeholder="Link to document" pattern="https?:\/\/(www\.)?[0-9a-zA-Z\-]+\.[a-zA-Z]{2,}([\/\w\?\=\.\-&]*)?" title="Please provide a valid link (http:// or https://)">
                 <input class="main-page" id="submit" type="submit" value="Go">
 
             </form>
@@ -46,32 +46,32 @@
             <p>How advanced should the vocabulary be?</p>
 
             <label for="elementary">Elementary School Level</label>
-            <input id="elementary" type="radio" name="language-level">
+            <input class="lang-buttons" id="elementary" type="radio" name="language-level" onclick="localStorage.setItem('lang', 'elementary');">
             <br>
 
             <label for="middle">Middle School Level</label>
-            <input id="middle" type="radio" name="language-level" checked>
+            <input class="lang-buttons" id="middle" type="radio" name="language-level" checked onclick="localStorage.setItem('lang', 'middle');">
             <br>
 
             <label for="high">High School Level</label>
-            <input id="high" type="radio" name="language-level">
+            <input class="lang-buttons" id="high" type="radio" name="language-level" onclick="localStorage.setItem('lang', 'high');">
             <br>
 
             <label for="adult">Adult Level</label>
-            <input id="adult" type="radio" name="language-level">
+            <input class="lang-buttons" id="adult" type="radio" name="language-level" onclick="localStorage.setItem('lang', 'adult');">
             <br>
 
             <label for="monkey">Monkey</label>
-            <input id="monkey" type="radio" name="language-level">
+            <input class="lang-buttons" id="monkey" type="radio" name="language-level" onclick="localStorage.setItem('lang', 'monkey');">
             <br>
 
             <h2>Summary Length</h2>
             <p>How long  should the summary be</p>
             <label for="normal" >Normal Length</label>
-            <input id="normal" type="radio" name="length" checked>
+            <input class="short-buttons" id="normal" type="radio" name="length" checked onclick="localStorage.setItem('short', false);">
             <br>
             <label for="short">Short</label>
-            <input id="short" type="radio" name="length">
+            <input class="short-buttons"  id="short" type="radio" name="length" onclick="localStorage.setItem('short', true);">
         </form>
 
     </aside>
