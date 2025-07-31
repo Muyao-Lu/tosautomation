@@ -1,10 +1,9 @@
 let keybind_normal = true;
 let saved = true;
-const state = "deployment";
+const state = "testing";
 
 let lang = "middle";
 let short = false;
-
 
 /* Initializes the chat for the first time */
 function initializeChat(){
@@ -16,9 +15,6 @@ function initializeChat(){
     newChat(link);
     addTab(link);
     document.getElementsByClassName("tab-button")[0].id = "selected";
-
-
-
 
     document.addEventListener('keydown', submitFollowup);
 }
@@ -126,15 +122,17 @@ function addTab(link){
 }
 
 function followupChat(q){
+    if (checkRateLimit()){
+        const link = sessionStorage.getItem("current_open");
 
-    const link = sessionStorage.getItem("current_open");
+        const old_storage = localStorage.getItem(link);
+        const new_storage = old_storage + "|" + q;
+        localStorage.setItem(link, new_storage)
 
-    const old_storage = localStorage.getItem(link);
-    const new_storage = old_storage + "|" + q;
-    localStorage.setItem(link, new_storage)
+        loadChatFromStorage(link);
+        getAjaxFollowup(link, q);
+    }
 
-    loadChatFromStorage(link);
-    getAjaxFollowup(link, q);
 
 }
 
@@ -353,18 +351,21 @@ function createChatsFromStorage(){
 
 function acceptNewTab(link){
     if (localStorage.getItem(link) === null){
-        clearChatFromScreen();
-        cancelPopup();
-        newChat(link);
-        addTab(link);
+        if (checkRateLimit()){
+            clearChatFromScreen();
+            cancelPopup();
+            newChat(link);
+            addTab(link);
 
-        const tabs = document.getElementsByClassName("tab-button");
+            const tabs = document.getElementsByClassName("tab-button");
 
-        for (let item of document.getElementsByClassName("tab-button")){
-            item.id = ""
+            for (let item of document.getElementsByClassName("tab-button")){
+                item.id = ""
+            }
+
+            tabs[tabs.length - 1].id = "selected";
         }
 
-        tabs[tabs.length - 1].id = "selected";
 
     }
     else{
@@ -394,6 +395,8 @@ function initialBind(){
     window.addEventListener("beforeunload", function(event){preventUnload(event)});
     document.getElementById("settings-button").addEventListener("click", toggleAside);
     configureForm();
+
+    sessionStorage.setItem("last-user-call", Date.now() - 20 * 1000);
     if (localStorage.length <= 2){
         document.getElementById("chat-input-form").addEventListener("submit", initializeChat);
         if (localStorage.length == 0){
@@ -492,6 +495,27 @@ function configureForm(){
         else{
             document.getElementById("normal").checked = true
         }
+    }
+
+}
+
+function checkRateLimit(){
+    console.log(Date.now())
+    console.log(sessionStorage.getItem("last-call"))
+    if (Date.now() - sessionStorage.getItem("last-call")  > 20 * 1000){
+        sessionStorage.setItem("last-call", Date.now())
+        return true
+    }
+    else{
+
+        sessionStorage.setItem("last-call", Date.now())
+        const alert = document.getElementById("alert");
+        alert.innerHTML = "Slow down! (Too many requests. Please wait 20s)";
+        alert.className = "active";
+        setTimeout(function (){alert.className="inactive";}, 3*1000)
+
+
+        return false
     }
 
 }
