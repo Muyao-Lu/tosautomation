@@ -1,6 +1,6 @@
 let keybind_normal = true;
 let saved = true;
-const state = "testing";
+const state = "deployment";
 
 let lang = "middle";
 let short = false;
