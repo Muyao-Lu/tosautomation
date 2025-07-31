@@ -7,6 +7,15 @@
     }
 }
 
+@keyframes fade-out{
+    from{
+        opacity: 1;
+    }
+    to{
+        opacity: 0;
+    }
+}
+
 @keyframes pop{
     0%{
         transform: scale(0);
@@ -343,5 +352,32 @@ body::-webkit-scrollbar{
 #submit.main-page{
     animation: slide-in-right 0.5s 1.2s;
     animation-fill-mode: backwards;
+}
+
+#alert.inactive{
+    display: none;
+    opacity: 1;
+}
+
+#alert.active{
+    color: white;
+    background-color: rgba(0, 0, 0, 1);
+    border: 3px solid #38b6ff;
+    font-size: max(18px, 3vmin);
+    animation: fade-out 3s;
+    animation-fill-mode: both;
+    position: fixed;
+    z-index: 1005;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 5%;
+    text-align: center;
+    font-family: "Lucida Console", Monaco, monospace;
+    display: flex;
+    align-items: center;
+    backdrop-filter: blur(20px);
+
+
 }
 
