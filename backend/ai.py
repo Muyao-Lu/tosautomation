@@ -1,8 +1,11 @@
 from openai import OpenAI
-import json, requests, tiktoken, time, convert
+import json, tiktoken
 from scraper import *
 from vector_db import vector_db
+import convert
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from urllib3 import request
+
 dotenv.load_dotenv()
 
 
@@ -53,7 +56,7 @@ class AiAccess:
 
 class AiChunker:
     def __init__(self):
-        self.MAX_CHUNK_SIZE = 5000
+        self.MAX_CHUNK_SIZE = 10000
         self.text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
             chunk_size=self.MAX_CHUNK_SIZE,
             chunk_overlap=self.MAX_CHUNK_SIZE * 0.1
@@ -202,12 +205,9 @@ class _HcAiModel:
     def __init__(self):
         self.URL = "https://ai.hackclub.com/chat/completions"
 
-    def call_ai(self, prompt, max_retries=5) -> str:
-
-        retries = 0
+    def call_ai(self, prompt, max_retries=3) -> str:
         headers = {
-            'Content-Type': 'application/json',
-            "Connection": "close"
+            'Content-Type': 'application/json'
         }
 
         json_data = {
@@ -218,21 +218,12 @@ class _HcAiModel:
                 },
             ],
         }
-        print("tried")
 
-        while retries <= max_retries:
-            with requests.session() as s:
-                try:
-                    response = s.post(self.URL, headers=headers, json=json_data)
-                    s.close()
-                    return response.json()["choices"][0]["message"]["content"]
-                except requests.exceptions.SSLError:
-                    s.close()
-                    time.sleep(3)
-                    retries += 1
-        else:
-            print("Error! AAWhjshdfjashj")
 
+        response = request("post", self.URL, json=json_data, headers=headers, retries=max_retries, timeout=10)
+        data = response.data
+        del response
+        return json.loads(data.decode("utf-8"))["choices"][0]["message"]["content"]
 
 
 
