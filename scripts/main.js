@@ -199,6 +199,7 @@ function getAjaxSummary(link){
       'short': short,
       'query': 'string'
     });
+    console.log(data);
 
     let endpoint = ""
     if (state=="testing"){
@@ -334,19 +335,31 @@ function cancelPopup(){
 }
 
 function createChatsFromStorage(){
-    const link = localStorage.key(2)
-    deleteInitialWelcome(link);
-    configureTabs();
 
-    for (let i = 2; i<localStorage.length; i++){
-        console.log(localStorage.key(i))
-        addTab(localStorage.key(i));
+    let link = null;
+
+
+    for (let i = 0; i<localStorage.length; i++){
+        if (! (localStorage.key(i) == "short") && ! (localStorage.key(i) == "lang")){
+            addTab(localStorage.key(i));
+
+            if (link===null){
+                configureTabs();
+                link = localStorage.key(i);
+                deleteInitialWelcome(link);
+                loadChatFromStorage(link);
+                updateCurrentOpenName(link);
+            }
+        }
+
     }
 
-    document.getElementsByClassName("tab-button")[0].id = "selected";
+    if (!link===null){
+        document.getElementsByClassName("tab-button")[0].id = "selected";
+    }
 
-    loadChatFromStorage(link);
-    updateCurrentOpenName(link);
+
+
 }
 
 function acceptNewTab(link){
@@ -394,20 +407,28 @@ function updateCurrentOpenName(name){
 function initialBind(){
     window.addEventListener("beforeunload", function(event){preventUnload(event)});
     document.getElementById("settings-button").addEventListener("click", toggleAside);
-    configureForm();
+    document.getElementById("chat-input-form").addEventListener("submit", initializeChat);
+
 
     sessionStorage.setItem("last-user-call", Date.now() - 20 * 1000);
-    if (localStorage.length <= 2){
-        document.getElementById("chat-input-form").addEventListener("submit", initializeChat);
-        if (localStorage.length == 0){
-            localStorage.setItem("lang", "middle");
+
+    if (localStorage.getItem("lang") === null){
+        localStorage.setItem("lang", "middle");
+        if (localStorage.getItem("short") === null){
             localStorage.setItem("short", "false");
         }
-
     }
     else{
-        createChatsFromStorage();
-        document.addEventListener('keydown', submitFollowup);
+        if (localStorage.getItem("short") === null){
+            localStorage.setItem("short", "false");
+        }
+        else{
+            if (localStorage.length > 2){
+                configureForm();
+                createChatsFromStorage();
+                document.addEventListener('keydown', submitFollowup);
+            }
+        }
     }
 
 
@@ -481,20 +502,18 @@ function setRequestConfigs(){
 }
 
 function configureForm(){
-    if (localStorage.length >= 2){
-        for (let item of document.getElementsByClassName("lang-buttons")){
+    for (let item of document.getElementsByClassName("lang-buttons")){
 
-            if (localStorage.getItem("lang") == item.id){
-                item.checked = true
-            }
+        if (localStorage.getItem("lang") == item.id){
+            item.checked = true
         }
+    }
 
-        if (localStorage.getItem("short") === "true"){
-            document.getElementById("short").checked = true
-        }
-        else{
-            document.getElementById("normal").checked = true
-        }
+    if (localStorage.getItem("short") === "true"){
+        document.getElementById("short").checked = true
+    }
+    else{
+        document.getElementById("normal").checked = true
     }
 
 }
