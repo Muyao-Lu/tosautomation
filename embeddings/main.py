@@ -6,7 +6,7 @@ import dotenv, requests
 import cohere
 dotenv.load_dotenv()
 
-APP_MODE = "deployment"
+APP_MODE = "testing"
 
 class Ranker:
 
@@ -105,9 +105,12 @@ class RankerModel(BaseModel):
 
 @app.post("/")
 async def process_ranking_request(request: RankerModel):
-    result = ranker.rank(query=request.query, documents=request.documents, origin=request.origin)
-    print("returning", result)
-    return result
+    if len(request.documents) > 0:
+        result = ranker.rank(query=request.query, documents=request.documents, origin=request.origin)
+        print("returning", result)
+        return result
+    else:
+        return None
 
 if APP_MODE == "testing":
     if __name__ == "__main__":
