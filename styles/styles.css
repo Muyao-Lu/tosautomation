@@ -249,9 +249,9 @@ main{
     background-color: rgb(56, 182, 255);
     border: none;
     border-right: rgba(255, 255, 255, 0.2) 1px solid;
-    width: 1vmin;
+    width: 2vmin;
     vertical-align: bottom;
-    width: max(2vh, 30px);
+    width: auto;
 }
 
 #bottom.post-config{
@@ -379,5 +379,15 @@ body::-webkit-scrollbar{
     backdrop-filter: blur(20px);
 
 
+}
+
+#instructions{
+    color: rgba(255, 255, 255, 0.3);
+    font-family: "Lucida Console", Monaco, monospace;
+    text-align: center;
+    font-size: max(2vmin, 12px);
+
+    margin: 0;
+    margin-top: 0.75%;
 }
 
