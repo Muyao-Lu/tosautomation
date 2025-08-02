@@ -45,7 +45,7 @@ function configureTabs(){
 
     const add_button = document.createElement("button");
     add_button.id = "add-button";
-    add_button.innerHTML = "+";
+    add_button.innerHTML = "New Tab";
     add_button.addEventListener("click", promptNewTab)
 
     tabs.appendChild(add_button);
@@ -74,12 +74,17 @@ function deleteInitialWelcome(link){
 
     new_textinput.id = "prompt-input";
     new_textinput.cols = "4";
-    new_textinput.placeholder = "Anything else to ask?";
+    new_textinput.placeholder = "Something unclear? Ask me a followup question :)";
     new_textinput.className = "main-page";
+
+    let instructions = document.createElement("p")
+    instructions.innerHTML = "Followup Questions - Click enter to submit"
+    instructions.id = "instructions"
 
 
     main.prepend(name_header);
     form.appendChild(new_textinput);
+    form.prepend(instructions);
 
 }
 
@@ -314,7 +319,7 @@ function promptNewTab(link){
 
     box.innerHTML = `<h2 id="prompt-h2">Enter a new link to simplify and then click Go!</h2>
                      <form onsubmit="return false" id="popup">
-                        <input id="link-input" class="mini-popup" type="text" placeholder="Link to document" pattern="https?:\\/\\/(www\\.)?[0-9a-zA-Z\\-]+\\.[a-zA-Z]{2,}([\\/\\w\\?\\=\\.\\-&]*)?" title="Please provide a valid link (http:// or https://)">
+                        <input id="link-input" class="mini-popup" type="text" placeholder="Link to document" pattern="https?:\\/\\/(www\\.)?[0-9a-zA-Z\\-]+\\.[a-zA-Z]{2,}([\\/\\w\\?\\=\\.\\-&%#]*)?" title="Please provide a valid link (http:// or https://)">
                         <input class="mini-popup" id="submit" type="submit" value="Go!">
                         <button class="mini-popup" id="cancel" type="button">Cancel</button>
                      </form>`
@@ -341,7 +346,7 @@ function createChatsFromStorage(){
 
     for (let i = 0; i<localStorage.length; i++){
         if (! (localStorage.key(i) == "short") && ! (localStorage.key(i) == "lang")){
-            addTab(localStorage.key(i));
+
 
             if (link===null){
                 configureTabs();
@@ -350,11 +355,12 @@ function createChatsFromStorage(){
                 loadChatFromStorage(link);
                 updateCurrentOpenName(link);
             }
+            addTab(localStorage.key(i));
         }
 
     }
 
-    if (!link===null){
+    if (! (link===null)){
         document.getElementsByClassName("tab-button")[0].id = "selected";
     }
 
