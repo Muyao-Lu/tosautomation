@@ -1,5 +1,5 @@
 from openai import OpenAI
-import json, tiktoken
+import json
 from scraper import *
 from vector_db import vector_db
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -216,6 +216,7 @@ class _HcAiModel:
         del response
         print("success")
         return json.loads(data.decode("utf-8"))["choices"][0]["message"]["content"]
+
 
 
 
