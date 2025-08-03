@@ -214,8 +214,9 @@ class _HcAiModel:
         response = request("post", self.URL, json=json_data, headers=headers, retries=max_retries, timeout=self.TIMEOUT)
         data = response.data
         del response
-        print("success")
+        print("success, got reponse of", json.loads(data.decode("utf-8")
         return json.loads(data.decode("utf-8"))["choices"][0]["message"]["content"]
+
 
 
 
