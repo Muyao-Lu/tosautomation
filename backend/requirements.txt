@@ -9,5 +9,4 @@ langchain_hyperbrowser
 psycopg2-binary
 python-dotenv
 markdown
-tiktoken
 

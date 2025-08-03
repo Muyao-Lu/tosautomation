@@ -2,9 +2,9 @@ from openai import OpenAI
 import json, tiktoken
 from scraper import *
 from vector_db import vector_db
-import convert
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from urllib3 import request
+from urllib3.util.timeout import Timeout
 
 dotenv.load_dotenv()
 
@@ -15,7 +15,7 @@ class AiAccess:
     """
     def __init__(self):
         self.MAIN_MODEL = _HcAiModel()
-        self.FALLBACK = _GithubAiModel()
+        # self.FALLBACK = _GithubAiModel()
         self.PROMPTER = _AiPromptGenerator()
         self.lang_level = None
 
@@ -33,10 +33,6 @@ class AiAccess:
             return self.MAIN_MODEL.call_ai(prompt)
         except Exception as e:
             print("Main model failed because of {exception}. Falling back".format(exception=e))
-            try:
-                return self.FALLBACK.call_ai(prompt)
-            except Exception as e:
-                print("Second model failed because of {exception}, after Main model failed. Try again in a bit".format(exception=e))
 
     def chat_completion(self, short, query, link, language_level="middle"):
         if short:
@@ -48,15 +44,11 @@ class AiAccess:
             return self.MAIN_MODEL.call_ai(prompt)
         except Exception as e:
             print("Main model failed because of {exception}. Falling back".format(exception=e))
-            try:
-                return self.FALLBACK.call_ai(prompt)
-            except Exception as e:
-                print("Second model failed because of {exception}, after Main model failed. Try again in a bit".format(exception=e))
 
 
 class AiChunker:
     def __init__(self):
-        self.MAX_CHUNK_SIZE = 10000
+        self.MAX_CHUNK_SIZE = 5000
         self.text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
             chunk_size=self.MAX_CHUNK_SIZE,
             chunk_overlap=self.MAX_CHUNK_SIZE * 0.1
@@ -70,8 +62,8 @@ class AiChunker:
 
         chunks_processed = []
         for chunk in chunks:
-            chunks_processed.append(convert.remove_think(self.ai_access.call_ai("Please reformat this excerpt to only contain key points. "
-                                                           "Denote separate sections with headers. \n ### Excerpt: {excerpt}".format(excerpt=chunk))))
+            chunks_processed.append(self.ai_access.call_ai("Please reformat this excerpt to only contain key points. "
+                                                           "Denote separate sections with headers. \n ### Excerpt: {excerpt}".format(excerpt=chunk)))
 
         return chunks_processed
 
@@ -82,9 +74,7 @@ class _AiPromptGenerator:
     def __init__(self):
         self.prompts = json.load(open("prompts.json", "r"))
         self.SCRAPER = ScraperDatabaseControl()
-        self.MODEL_TOKEN_LIMIT = 100000
-        self.chunker = AiChunker()
-        self.TOKEN_COUNTER = tiktoken.get_encoding("cl100k_base")
+        self.MODEL_TOKEN_LIMIT = 100000000
 
     def generate_prompt(self, link, language_level) -> str:
         """
@@ -94,12 +84,6 @@ class _AiPromptGenerator:
         :return: Complete prompt
         """
         policy = vector_db.get_by_link(link).document
-
-        if len(self.TOKEN_COUNTER.encode(policy)) > self.MODEL_TOKEN_LIMIT:
-            chunks = self.chunker.split_and_process(policy)
-            policy = ""
-            for chunk in chunks:
-                policy += chunk + "\n\n"
 
         content = self.prompts["language-levels"][language_level]
         content += self.prompts["normal"]["default-prompts"]["default-prompt-head"]
@@ -159,12 +143,6 @@ class _AiPromptGenerator:
         """
         policy = vector_db.get_by_link(link).document
 
-        if len(self.TOKEN_COUNTER.encode(policy)) > self.MODEL_TOKEN_LIMIT:
-            chunks = self.chunker.split_and_process(policy)
-            policy = ""
-            for chunk in chunks:
-                policy += chunk + "\n\n"
-
         content = self.prompts["language-levels"][language_level]
         content += self.prompts["short"]["short-head"]
 
@@ -204,25 +182,39 @@ class _HcAiModel:
 
     def __init__(self):
         self.URL = "https://ai.hackclub.com/chat/completions"
+        self.TIMEOUT = Timeout(connect=2, read=50)
 
-    def call_ai(self, prompt, max_retries=3) -> str:
+    def call_ai(self, prompt, max_retries=3, think=False) -> str:
+
         headers = {
             'Content-Type': 'application/json'
         }
+        if think:
+            json_data = {
+                'messages': [
+                    {
+                        'role': 'user',
+                        'content': prompt,
+                    },
+                ],
+            }
+        else:
+            json_data = {
+                'messages': [
+                    {
+                        'role': 'user',
+                        'content': prompt + "  * /no_think *",
+                    },
+                ],
+            }
 
-        json_data = {
-            'messages': [
-                {
-                    'role': 'system',
-                    'content': prompt,
-                },
-            ],
-        }
+        print("called with", json_data)
 
 
-        response = request("post", self.URL, json=json_data, headers=headers, retries=max_retries, timeout=10)
+        response = request("post", self.URL, json=json_data, headers=headers, retries=max_retries, timeout=self.TIMEOUT)
         data = response.data
         del response
+        print("success")
         return json.loads(data.decode("utf-8"))["choices"][0]["message"]["content"]
 
 
