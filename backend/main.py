@@ -9,7 +9,7 @@ from scraper import ScraperDatabaseControl
 from convert import convert_to_html, check_link
 from ip import IpController
 
-APP_MODE = "testing"
+APP_MODE = "deployment"
 assert APP_MODE == "testing" or APP_MODE == "deployment"
 
 if APP_MODE == "testing":
@@ -91,3 +91,4 @@ async def process_terms_of_service(document_type, request: Request):
 if APP_MODE == "testing":
     if __name__ == '__main__':
         uvicorn.run(app, port=800)
+
