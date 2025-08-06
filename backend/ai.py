@@ -1,10 +1,9 @@
 from openai import OpenAI
-import json
+import json, tiktoken
 from scraper import *
 from vector_db import vector_db
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from urllib3 import request
-from urllib3.util.timeout import Timeout
+from groq import Groq, RateLimitError
+
 
 dotenv.load_dotenv()
 
@@ -15,24 +14,39 @@ class AiAccess:
     """
     def __init__(self):
         self.MAIN_MODEL = _HcAiModel()
-        # self.FALLBACK = _GithubAiModel()
         self.PROMPTER = _AiPromptGenerator()
-        self.lang_level = None
+        self.SEGMENTS = ["information-cookies",
+                         "rules-and-reg",
+                         "user-rights",
+                         "safety"]
+        self.SEGMENT_MAPPINGS = {
+            "information-cookies": "*What the company does with your information. How do they collect it? How is it stored? How is it used? Is data sold or shared?",
+            "rules-and-reg": "*What rules must the user obey to use the services? What regulations are in place? What aren't users allowed to do?",
+            "user-rights": "*What rights do users have over their own information? How about in disputes with the company?",
+            "safety": "*How does the company ensure a user's safety when using their services? How are users protected?"}
 
 
 
     def call_summarizer(self, link, short, language_level="middle"):
-        self.lang_level = language_level
-        if short:
-            prompt = self.PROMPTER.generate_short_prompt(link=link, language_level=language_level)
-        else:
-            prompt = self.PROMPTER.generate_prompt(link=link, language_level=language_level)
+        summary = ""
+        for item in self.SEGMENTS:
+            prompt = self.PROMPTER.generate_prompt_for_chunk(chunk_type=item,
+                                                             chunk_description=self.SEGMENT_MAPPINGS[item], link=link,
+                                                             language_level=language_level)
+            try:
+                summary += self.MAIN_MODEL.call_ai(prompt) + "\n\n"
+            except RateLimitError:
+                return "Backend Rate Limit Exceeded. Try again later."
+            except Exception as e:
+                print("Main model failed because of {exception}".format(exception=e))
+                return "Something went wrong"
 
-        print("prompt = ", prompt)
-        try:
-            return self.MAIN_MODEL.call_ai(prompt)
-        except Exception as e:
-            print("Main model failed because of {exception}. Falling back".format(exception=e))
+        doc_sum = self.PROMPTER.generate_prompt_for_summary(document=summary, language_level=language_level)
+        refined_sum = self.MAIN_MODEL.call_ai(doc_sum)
+
+
+        print("s", summary)
+        return refined_sum
 
     def chat_completion(self, short, query, link, language_level="middle"):
         if short:
@@ -46,27 +60,6 @@ class AiAccess:
             print("Main model failed because of {exception}. Falling back".format(exception=e))
 
 
-class AiChunker:
-    def __init__(self):
-        self.MAX_CHUNK_SIZE = 5000
-        self.text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-            chunk_size=self.MAX_CHUNK_SIZE,
-            chunk_overlap=self.MAX_CHUNK_SIZE * 0.1
-        )
-        self.ai_access = _HcAiModel()
-
-        self.TOKEN_COUNTER = tiktoken.get_encoding("cl100k_base")
-
-    def split_and_process(self, document):
-        chunks = self.text_splitter.split_text(document)
-
-        chunks_processed = []
-        for chunk in chunks:
-            chunks_processed.append(self.ai_access.call_ai("Please reformat this excerpt to only contain key points. "
-                                                           "Denote separate sections with headers. \n ### Excerpt: {excerpt}".format(excerpt=chunk)))
-
-        return chunks_processed
-
 class _AiPromptGenerator:
     """
         Class for prompt generation
@@ -74,23 +67,18 @@ class _AiPromptGenerator:
     def __init__(self):
         self.prompts = json.load(open("prompts.json", "r"))
         self.SCRAPER = ScraperDatabaseControl()
-        self.MODEL_TOKEN_LIMIT = 100000000
+        self.TOKEN_COUNTER = tiktoken.get_encoding("cl100k_base")
 
-    def generate_prompt(self, link, language_level) -> str:
-        """
-        Generates initial prompt for AI models.
-        :param link: The link of the privacy policy to create the prompt for
-        :param language_level: The level of complexity that the prompt generator should ask for
-        :return: Complete prompt
-        """
-        policy = vector_db.get_by_link(link).document
-
+    def generate_prompt_for_chunk(self, chunk_type, chunk_description, link, language_level):
+        policy = vector_db.get_closest_neighbor(link=link, query=chunk_description, rewrite=False)
         content = self.prompts["language-levels"][language_level]
-        content += self.prompts["normal"]["default-prompts"]["default-prompt-head"]
-        content += self.prompts["normal"]["default-prompts"]["default-prompt-tail"]
+        content += self.prompts["normal"]["default-template"].format(link=link, format=self.prompts["normal"]["prompt-segments"][chunk_type], excerpt=policy)
 
-        content = content.format(policy=policy)
+        return content
 
+    def generate_prompt_for_summary(self, document, language_level):
+        content = self.prompts["language-levels"][language_level]
+        content += self.prompts["normal"]["summary-template"].format(excerpt=document)
         return content
 
     def generate_completion_prompt(self, query, link, language_level="middle") -> str:
@@ -143,6 +131,12 @@ class _AiPromptGenerator:
         """
         policy = vector_db.get_by_link(link).document
 
+        if len(self.TOKEN_COUNTER.encode(policy)) > self.MODEL_TOKEN_LIMIT:
+            chunks = self.chunker.split_and_process(policy)
+            policy = ""
+            for chunk in chunks:
+                policy += chunk + "\n\n"
+
         content = self.prompts["language-levels"][language_level]
         content += self.prompts["short"]["short-head"]
 
@@ -181,45 +175,25 @@ class _GithubAiModel:
 class _HcAiModel:
 
     def __init__(self):
-        self.URL = "https://ai.hackclub.com/chat/completions"
-        self.TIMEOUT = Timeout(connect=2, read=50)
+        self.URL = "https://api.groq.com/openai/v1/chat/completions"
+        self.client = Groq(api_key=os.environ.get("GROQ_KEY"))
+        self.model = "llama-3.1-8b-instant"
 
-    def call_ai(self, prompt, max_retries=3, think=False) -> str:
+    def call_ai(self, prompt) -> str:
+        print("prompted with", prompt)
 
-        headers = {
-            'Content-Type': 'application/json'
-        }
-        if think:
-            json_data = {
-                'messages': [
-                    {
-                        'role': 'user',
-                        'content': prompt,
-                    },
-                ],
-            }
-        else:
-            json_data = {
-                'messages': [
-                    {
-                        'role': 'user',
-                        'content': prompt + "  * /no_think *",
-                    },
-                ],
-            }
+        messages = [
+            {
+                'role': 'user',
+                'content': prompt,
 
-        print("called with", json_data)
+            },
+        ]
+
+        res = self.client.chat.completions.create(model=self.model, temperature=0.5, messages=messages)
 
 
-        response = request("post", self.URL, json=json_data, headers=headers, retries=max_retries, timeout=self.TIMEOUT)
-        data = response.data
-        del response
-        print("success, got reponse of", json.loads(data.decode("utf-8")))
-        return json.loads(data.decode("utf-8"))["choices"][0]["message"]["content"]
-
-
-
-
+        return res.choices[0].message.content
 
 
 

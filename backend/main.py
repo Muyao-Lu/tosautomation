@@ -9,7 +9,7 @@ from scraper import ScraperDatabaseControl
 from convert import convert_to_html, check_link
 from ip import IpController
 
-APP_MODE = "deployment"
+APP_MODE = "testing"
 assert APP_MODE == "testing" or APP_MODE == "deployment"
 
 if APP_MODE == "testing":
