@@ -6,7 +6,7 @@ import dotenv, os, cohere
 from groq import Groq
 dotenv.load_dotenv()
 
-APP_MODE = "testing"
+APP_MODE = "deployment"
 
 class Ranker:
 
@@ -118,4 +118,5 @@ async def process_ranking_request(request: RankerModel):
 if APP_MODE == "testing":
     if __name__ == "__main__":
         uvicorn.run(app, port=8000)
+
 
