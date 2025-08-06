@@ -2,11 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
-import dotenv, requests
-import cohere
+import dotenv, os, cohere
+from groq import Groq
 dotenv.load_dotenv()
 
-APP_MODE = "deployment"
+APP_MODE = "testing"
 
 class Ranker:
 
@@ -20,9 +20,12 @@ class Ranker:
         self.rewriter = Rewriter()
         self.MIN_CONFIDANCE = min_confidance
 
-    def rank(self, query, documents, origin):
+    def rank(self, query, documents, origin, rewrite):
+        if rewrite:
+            query_enhanced = self.rewriter.call_ai(query, origin=origin)
+        else:
+            query_enhanced = query
 
-        query_enhanced = self.rewriter.call_ai(query, origin=origin)
         results = self.client.rerank(
             model="rerank-v3.5",
             query=query_enhanced,
@@ -55,6 +58,8 @@ class Ranker:
 class Rewriter:
     def __init__(self):
         self.URL = "https://ai.hackclub.com/chat/completions"
+        self.client = Groq(api_key=os.environ.get("GROQ_KEY"))
+        self.model = "llama-3.1-8b-instant"
 
     def call_ai(self, prompt_to_rewrite, origin) -> str:
         prompt = ("Please rewrite the following prompt for better Retrieval Augmented Generation search. "
@@ -62,21 +67,17 @@ class Rewriter:
                   "leave it as is. Unless otherwise stated assume the excerpt is from {origin} \n {prompt}")
         prompt = prompt.format(prompt=prompt_to_rewrite, origin=origin)
 
-        headers = {
-            'Content-Type': 'application/json',
-        }
+        messages = [
+            {
+                'role': 'user',
+                'content': prompt,
 
-        json_data = {
-            'messages': [
-                {
-                    'role': 'system',
-                    'content': prompt,
-                },
-            ],
-        }
+            },
+        ]
 
-        response = requests.post(self.URL, headers=headers, json=json_data)
-        return response.json()["choices"][0]["message"]["content"]
+        res = self.client.chat.completions.create(model=self.model, temperature=0, messages=messages)
+
+        return res.choices[0].message.content
 
 
 app = FastAPI(docs_url=None, redoc_url=None)
@@ -102,11 +103,13 @@ class RankerModel(BaseModel):
     query: str
     documents: list
     origin: str
+    rewrite: bool
 
 @app.post("/")
 async def process_ranking_request(request: RankerModel):
     if len(request.documents) > 0:
-        result = ranker.rank(query=request.query, documents=request.documents, origin=request.origin)
+        print(request.rewrite)
+        result = ranker.rank(query=request.query, documents=request.documents, origin=request.origin, rewrite=request.rewrite)
         print("returning", result)
         return result
     else:
@@ -115,5 +118,4 @@ async def process_ranking_request(request: RankerModel):
 if APP_MODE == "testing":
     if __name__ == "__main__":
         uvicorn.run(app, port=8000)
-
 
