@@ -1,5 +1,5 @@
 from openai import OpenAI
-import json, tiktoken
+import json
 from scraper import *
 from vector_db import vector_db
 from groq import Groq, RateLimitError
@@ -36,6 +36,7 @@ class AiAccess:
             try:
                 summary += self.MAIN_MODEL.call_ai(prompt) + "\n\n"
             except RateLimitError:
+                print("Rate Limit Error! ")
                 return "Backend Rate Limit Exceeded. Try again later."
             except Exception as e:
                 print("Main model failed because of {exception}".format(exception=e))
@@ -67,7 +68,6 @@ class _AiPromptGenerator:
     def __init__(self):
         self.prompts = json.load(open("prompts.json", "r"))
         self.SCRAPER = ScraperDatabaseControl()
-        self.TOKEN_COUNTER = tiktoken.get_encoding("cl100k_base")
 
     def generate_prompt_for_chunk(self, chunk_type, chunk_description, link, language_level):
         policy = vector_db.get_closest_neighbor(link=link, query=chunk_description, rewrite=False)
@@ -121,28 +121,6 @@ class _AiPromptGenerator:
 
         return content
 
-
-    def generate_short_prompt(self, link, language_level="middle") -> str:
-        """
-            Generates prompt for short summaries of the privacy policy.
-            :param link: Link to privacy policy to generate prompt for
-            :param language_level: The level of complexity that the prompt generator should ask for
-            :return: Complete prompt for short privacy policy/tos simplification
-        """
-        policy = vector_db.get_by_link(link).document
-
-        if len(self.TOKEN_COUNTER.encode(policy)) > self.MODEL_TOKEN_LIMIT:
-            chunks = self.chunker.split_and_process(policy)
-            policy = ""
-            for chunk in chunks:
-                policy += chunk + "\n\n"
-
-        content = self.prompts["language-levels"][language_level]
-        content += self.prompts["short"]["short-head"]
-
-        content += self.prompts["short"]["short-tail"]
-        content = content.format(policy=policy)
-        return content
 
 
 class _GithubAiModel:
