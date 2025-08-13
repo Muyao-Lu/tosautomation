@@ -40,8 +40,6 @@ class AiAccess:
             print("Main model failed because of {exception}".format(exception=e))
             return "Something went wrong"
 
-
-        print("s", summary)
         return summary
 
     def chat_completion(self, short, query, link, language_level="middle"):
@@ -68,14 +66,19 @@ class _AiPromptGenerator:
         content = self.prompts["language-levels"][language_level]
         content += self.prompts["normal"]["prompt"]
 
-        for item in segments.keys():
+        s = segments.copy()
+
+        for item in s.keys():
             n = vector_db.get_closest_neighbor(link=link, query=segments[item], rewrite=False)
+            s[item] = n
+
+        print(type(s))
+        print("S", s)
         print(content)
+        s["source"] = link
 
-        segments["source"] = link
-
-
-        content = content.format(**segments)
+        content = content.format(**s)
+        print("Prompt", content)
         return content
 
     def generate_prompt_for_chunk(self, chunk_type, chunk_description, link, language_level):
