@@ -15,10 +15,13 @@ class AiAccess:
     def __init__(self):
         self.MAIN_MODEL = _HcAiModel()
         self.PROMPTER = _AiPromptGenerator()
+        """""
         self.SEGMENTS = ["information-cookies",
                          "rules-and-reg",
                          "user-rights",
                          "safety"]
+        """""
+
         self.SEGMENT_MAPPINGS = {
             "information-cookies": "*What the company does with your information. How do they collect it? How is it stored? How is it used? Is data sold or shared?",
             "rules-and-reg": "*What rules must the user obey to use the services? What regulations are in place? What aren't users allowed to do?",
@@ -26,28 +29,20 @@ class AiAccess:
             "safety": "*How does the company ensure a user's safety when using their services? How are users protected?"}
 
 
-
     def call_summarizer(self, link, short, language_level="middle"):
-        summary = ""
-        for item in self.SEGMENTS:
-            prompt = self.PROMPTER.generate_prompt_for_chunk(chunk_type=item,
-                                                             chunk_description=self.SEGMENT_MAPPINGS[item], link=link,
-                                                             language_level=language_level)
-            try:
-                summary += self.MAIN_MODEL.call_ai(prompt) + "\n\n"
-            except RateLimitError:
-                print("Rate Limit Error! ")
-                return "Backend Rate Limit Exceeded. Try again later."
-            except Exception as e:
-                print("Main model failed because of {exception}".format(exception=e))
-                return "Something went wrong"
-
-        doc_sum = self.PROMPTER.generate_prompt_for_summary(document=summary, language_level=language_level)
-        refined_sum = self.MAIN_MODEL.call_ai(doc_sum)
+        prompt = self.PROMPTER.generate_summary(link=link, segments=self.SEGMENT_MAPPINGS, language_level=language_level)
+        try:
+            summary = self.MAIN_MODEL.call_ai(prompt) + "\n\n"
+        except RateLimitError:
+            print("Rate Limit Error! ")
+            return "Backend Rate Limit Exceeded. Try again later."
+        except Exception as e:
+            print("Main model failed because of {exception}".format(exception=e))
+            return "Something went wrong"
 
 
         print("s", summary)
-        return refined_sum
+        return summary
 
     def chat_completion(self, short, query, link, language_level="middle"):
         if short:
@@ -68,6 +63,20 @@ class _AiPromptGenerator:
     def __init__(self):
         self.prompts = json.load(open("prompts.json", "r"))
         self.SCRAPER = ScraperDatabaseControl()
+
+    def generate_summary(self, segments: dict, language_level: str, link: str):
+        content = self.prompts["language-levels"][language_level]
+        content += self.prompts["normal"]["prompt"]
+
+        for item in segments.keys():
+            n = vector_db.get_closest_neighbor(link=link, query=segments[item], rewrite=False)
+        print(content)
+
+        segments["source"] = link
+
+
+        content = content.format(**segments)
+        return content
 
     def generate_prompt_for_chunk(self, chunk_type, chunk_description, link, language_level):
         policy = vector_db.get_closest_neighbor(link=link, query=chunk_description, rewrite=False)
@@ -172,6 +181,5 @@ class _HcAiModel:
 
 
         return res.choices[0].message.content
-
 
 

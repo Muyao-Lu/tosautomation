@@ -27,8 +27,8 @@ class VectorDatabaseControl:
             chunk_overlap=200
         )
 
-        self.URL = "https://tosautomation-embeddings.vercel.app"
-        # self.URL = "http://127.0.0.1:8000"
+        # self.URL = "https://tosautomation-embeddings.vercel.app"
+        self.URL = "http://127.0.0.1:8000"
         SQLModel.metadata.create_all(self.engine)
 
     def add(self, item, link):
@@ -52,25 +52,20 @@ class VectorDatabaseControl:
 
 
     def get_closest_neighbor(self, link, query, rewrite=True):
-        try:
-            item = self.get_by_link(link)
-            all_sections = self.text_splitter.split_text(item.document)
-            headers = {
-                'Content-Type': 'application/json',
-            }
+        item = self.get_by_link(link)
+        all_sections = self.text_splitter.split_text(item.document)
+        headers = {
+            'Content-Type': 'application/json',
+        }
 
-            json_data = {
-                "query": query,
-                "documents": all_sections,
-                "origin": link,
-                "rewrite": rewrite
-            }
+        json_data = {
+            "query": query,
+            "documents": all_sections,
+            "origin": link,
+            "rewrite": rewrite
+        }
 
-            response = requests.post(self.URL, headers=headers, json=json_data)
-            return response.json()
-
-        except NoResultFound:
-            return None
+        response = requests.post(self.URL, headers=headers, json=json_data)
+        return response.json()
 
 vector_db = VectorDatabaseControl()
-
