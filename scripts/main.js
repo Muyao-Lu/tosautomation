@@ -1,6 +1,6 @@
 let keybind_normal = true;
 let saved = true;
-const state = "deployment";
+const state = "testing";
 
 let lang = "middle";
 let short = false;
@@ -227,7 +227,8 @@ function getAjaxSummary(link){
 
         }
         else if (this.readyState == 4){
-            localStorage.setItem(link, this.responseText.replace(/"/g, ""));
+            console.log("rt" + encode_input(this.responseText));
+            localStorage.setItem(link, encode_input(this.responseText.replace(/"/g, "")));
             if (sessionStorage.getItem("current_open") == link){
                 loadChatFromStorage(sessionStorage.getItem("current_open"));
 
@@ -277,7 +278,7 @@ function getAjaxFollowup(link, query){
         else if (this.readyState == 4){
             const old_storage = localStorage.getItem(link);
             console.log(this.responseText);
-            const new_storage = old_storage + "|" + this.responseText.replace(/"/g, "");
+            const new_storage = old_storage + "|" + encode_input(this.responseText.replace(/"/g, ""));
             localStorage.setItem(link, new_storage);
 
             if (sessionStorage.getItem("current_open") == link){
@@ -298,11 +299,11 @@ function loadChatFromStorage(link){
 
     for (let i=0; i<processed.length; i++){
         if ((i%2)==0){
-            newAiTextbox(processed[i]);
+            newAiTextbox(decode_output(processed[i]));
 
         }
         else{
-            newUserTextbox(processed[i]);
+            newUserTextbox(decode_output(processed[i]));
         }
     }
     updateCurrentOpenName(link);
@@ -543,6 +544,17 @@ function checkRateLimit(){
         return false
     }
 
+}
+
+function encode_input(string){
+    console.log("pre" + string)
+    console.log("post" + string.replace(/\|/g, "sc:bar"))
+    return string.replace(/\|/g, "sc:bar");
+
+}
+
+function decode_output(string){
+    return string.replace(/sc:bar/g, "|")
 }
 
 
