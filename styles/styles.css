@@ -164,6 +164,37 @@ main{
     font-size: max(2vmin, 14px);
 }
 
+.textbox td{
+    font-size: max(1.5vmin, 10px);
+}
+
+.textbox hr{
+    margin: 3vmin;
+}
+
+.textbox table{
+    width: 80%;
+}
+
+.textbox td, .textbox th{
+    border: 1px solid white;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.textbox table{
+    border: 1px solid white;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.textbox th{
+    font-size: max(1.75vmin, 12px);
+}
+
+.textbox br{
+    display: none;
+}
 .chat-parent{
     width: 90%;
     margin: 5%;
