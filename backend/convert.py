@@ -4,12 +4,13 @@ valid_url_schemes =  ["https", "http"]
 valid_url_special_chars = ["-", "_", "."]
 
 def convert_to_html(mk):
-    print("mk", mk)
     converted = remove_think(mk)
-    converted = markdown.markdown(converted)
+    converted = markdown.markdown(converted, extensions=["tables"])
     converted = converted.replace("\n", "<br>")
     converted = converted.replace('"', "'")
-
+    print(converted)
+    converted = remove_line_breaks(converted, 2)
+    print(converted)
 
     return converted
 
@@ -38,6 +39,13 @@ def remove_think(string):
     new_string = re.sub(think_pattern, "", string)
 
     return new_string
+
+def remove_line_breaks(string: str, consecutive_n=5):
+    pattern = f'<br>{consecutive_n,consecutive_n}(<br>){1,}'
+    new_string = re.sub(pattern, "", string)
+
+    return new_string
+
 
 
 
