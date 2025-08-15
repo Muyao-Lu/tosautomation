@@ -172,7 +172,7 @@ class _HcAiModel:
     def __init__(self):
         self.URL = "https://api.groq.com/openai/v1/chat/completions"
         self.client = Groq(api_key=os.environ.get("GROQ_KEY"))
-        self.model = "llama-3.3-70b-versatile"
+        self.model = "openai/gpt-oss-120b"
 
     def call_ai(self, prompt) -> str:
         print("prompted with", prompt)
