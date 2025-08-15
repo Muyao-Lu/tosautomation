@@ -74,7 +74,7 @@ class _AiPromptGenerator:
         s = segments.copy()
 
         for item in s.keys():
-            n = vector_db.get_closest_neighbor(link=link, query=segments[item], rewrite=False)
+            n = vector_db.get_closest_neighbor(link=link, query=segments[item], rewrite=False, only_top=True)
             if n is not None:
                 s[item] = n
             else:

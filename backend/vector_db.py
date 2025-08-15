@@ -51,7 +51,7 @@ class VectorDatabaseControl:
             return results.one()
 
 
-    def get_closest_neighbor(self, link, query, rewrite=True):
+    def get_closest_neighbor(self, link, query, rewrite=True, only_top=False):
         item = self.get_by_link(link)
         all_sections = self.text_splitter.split_text(item.document)
         headers = {
@@ -62,12 +62,11 @@ class VectorDatabaseControl:
             "query": query,
             "documents": all_sections,
             "origin": link,
-            "rewrite": rewrite
+            "rewrite": rewrite,
+            "only-top": only_top
         }
 
         response = requests.post(self.URL, headers=headers, json=json_data)
         return response.json()
 
 vector_db = VectorDatabaseControl()
-
-
