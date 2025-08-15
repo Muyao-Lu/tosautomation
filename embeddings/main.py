@@ -20,7 +20,7 @@ class Ranker:
         self.rewriter = Rewriter()
         self.MIN_CONFIDANCE = min_confidance
 
-    def rank(self, query, documents, origin, rewrite):
+    def rank(self, query, documents, origin, rewrite, return_only_top_on_low_confidance=True):
         if rewrite:
             query_enhanced = self.rewriter.call_ai(query, origin=origin)
         else:
@@ -41,19 +41,20 @@ class Ranker:
         results_text = documents[first_item_data["index"]]
 
 
-
-
-        if float(first_item_data["relevance_score"]) > self.MIN_CONFIDANCE:
+        if return_only_top_on_low_confidance:
             return results_text
         else:
-            """""
-                Will turn into a lambda if you believe hard enough
-            """""
-            l = []
-            for item in results["results"]:
-                l.append(documents[dict(item)["index"]])
+            if float(first_item_data["relevance_score"]) > self.MIN_CONFIDANCE:
+                return results_text
+            else:
+                """""
+                    Will turn into a lambda if you believe hard enough
+                """""
+                l = []
+                for item in results["results"]:
+                    l.append(documents[dict(item)["index"]])
 
-            return l
+                return l
 
 class Rewriter:
     def __init__(self):
@@ -104,12 +105,14 @@ class RankerModel(BaseModel):
     documents: list
     origin: str
     rewrite: bool
+    only_top: bool = False
 
 @app.post("/")
 async def process_ranking_request(request: RankerModel):
     if len(request.documents) > 0:
         print(request.rewrite)
-        result = ranker.rank(query=request.query, documents=request.documents, origin=request.origin, rewrite=request.rewrite)
+        result = ranker.rank(query=request.query, documents=request.documents, origin=request.origin,
+                            rewrite=request.rewrite, return_only_top_on_low_confidance=request.only_top)
         print("returning", result)
         return result
     else:
@@ -118,5 +121,4 @@ async def process_ranking_request(request: RankerModel):
 if APP_MODE == "testing":
     if __name__ == "__main__":
         uvicorn.run(app, port=8000)
-
 
