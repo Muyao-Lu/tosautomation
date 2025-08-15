@@ -31,16 +31,21 @@ class AiAccess:
 
     def call_summarizer(self, link, short, language_level="middle"):
         prompt = self.PROMPTER.generate_summary(link=link, segments=self.SEGMENT_MAPPINGS, language_level=language_level)
-        try:
-            summary = self.MAIN_MODEL.call_ai(prompt) + "\n\n"
-        except RateLimitError:
-            print("Rate Limit Error! ")
-            return "Backend Rate Limit Exceeded. Try again later."
-        except Exception as e:
-            print("Main model failed because of {exception}".format(exception=e))
-            return "Something went wrong"
+        if prompt is not None:
 
-        return summary
+            try:
+                summary = self.MAIN_MODEL.call_ai(prompt)
+
+            except RateLimitError:
+                print("Rate Limit Error! ")
+                return "Backend Rate Limit Exceeded. Try again later."
+            except Exception as e:
+                print("Main model failed because of {exception}".format(exception=e))
+                return "Something went wrong"
+
+            return summary
+        else:
+            return "The link you inputted could not be found :(. Please check your link"
 
     def chat_completion(self, short, query, link, language_level="middle"):
         if short:
@@ -70,11 +75,11 @@ class _AiPromptGenerator:
 
         for item in s.keys():
             n = vector_db.get_closest_neighbor(link=link, query=segments[item], rewrite=False)
-            s[item] = n
+            if n is not None:
+                s[item] = n
+            else:
+                return None
 
-        print(type(s))
-        print("S", s)
-        print(content)
         s["source"] = link
 
         content = content.format(**s)
@@ -167,7 +172,7 @@ class _HcAiModel:
     def __init__(self):
         self.URL = "https://api.groq.com/openai/v1/chat/completions"
         self.client = Groq(api_key=os.environ.get("GROQ_KEY"))
-        self.model = "llama-3.1-8b-instant"
+        self.model = "llama-3.3-70b-versatile"
 
     def call_ai(self, prompt) -> str:
         print("prompted with", prompt)
