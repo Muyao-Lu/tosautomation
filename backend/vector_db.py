@@ -23,7 +23,7 @@ class VectorDatabaseControl:
 
         self.engine = create_engine(self.DATABASE_URL)
         self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=2000,
+            chunk_size=1000,
             chunk_overlap=200
         )
 
@@ -69,4 +69,5 @@ class VectorDatabaseControl:
         return response.json()
 
 vector_db = VectorDatabaseControl()
+
 
