@@ -166,6 +166,7 @@ main{
 
 .textbox td{
     font-size: max(1.5vmin, 10px);
+    padding: 2%;
 }
 
 .textbox hr{
@@ -174,6 +175,7 @@ main{
 
 .textbox table{
     width: 80%;
+    justify-self: center;
 }
 
 .textbox td, .textbox th{
