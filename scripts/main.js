@@ -131,7 +131,7 @@ function followupChat(q){
         const link = sessionStorage.getItem("current_open");
 
         const old_storage = localStorage.getItem(link);
-        const new_storage = old_storage + "|" + q;
+        const new_storage = old_storage + "|" + encode_input(q);
         localStorage.setItem(link, new_storage)
 
         loadChatFromStorage(link);
@@ -547,8 +547,6 @@ function checkRateLimit(){
 }
 
 function encode_input(string){
-    console.log("pre" + string)
-    console.log("post" + string.replace(/\|/g, "sc:bar"))
     return string.replace(/\|/g, "sc:bar");
 
 }
@@ -559,4 +557,3 @@ function decode_output(string){
 
 
 initialBind();
-
