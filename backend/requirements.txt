@@ -10,4 +10,5 @@ psycopg2-binary
 python-dotenv
 markdown
 groq
+pdfplumber
 
