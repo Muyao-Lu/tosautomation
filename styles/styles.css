@@ -1,3 +1,4 @@
+
 @keyframes fade-in{
     from{
         opacity: 0;
@@ -203,6 +204,11 @@ main{
 
 .textbox th{
     font-size: max(1.75vmin, 12px);
+}
+
+.textbox br{
+
+    display: none
 }
 
 .chat-parent{
@@ -441,5 +447,6 @@ body::-webkit-scrollbar{
     margin: 0;
     margin-top: 0.75%;
 }
+
 
 
