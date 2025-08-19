@@ -25,7 +25,7 @@
 
     <main class="pre-config">
         <img id="welcome-icon" src="static/avatar.png">
-        <h2 id="initial-prompt">Enter the link to a <b>privacy policy / terms of service </b> below, and watch the magic happen</h2>
+        <h2 id="initial-prompt">Tired of reading full legal documents?<br><br>Enter a link to a <u>Terms of Service/Privacy Policy</u>, and have it simplified for you!</h2>
         <div id="bottom">
 
             <form id="chat-input-form" onsubmit="return false">
@@ -65,8 +65,8 @@
             <input class="lang-buttons" id="monkey" type="radio" name="language-level" onclick="localStorage.setItem('lang', 'monkey');">
             <br>
 
-            <h2>Answer Length</h2>
-            <p>How long  should followup question answers be. <b>*Note: This only applies to followup questions, not the summary*</b></p>
+            <h2>Summary Length</h2>
+            <p>How long  should the summary be</p>
             <label for="normal" >Normal Length</label>
             <input class="short-buttons" id="normal" type="radio" name="length" checked onclick="localStorage.setItem('short', false);">
             <br>
@@ -75,10 +75,10 @@
         </form>
 
     </aside>
-    <div id="alert" class="inactive"></div>
+    <div id="alert" class="inactive">Too many requests! Please wait 20s</div>
+    <div id="loading" class="inactive">Loading...</div>
 
 
 
 </body>
 </html>
-
