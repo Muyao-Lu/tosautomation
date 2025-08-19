@@ -4,6 +4,7 @@ const state = "deployment";
 
 let lang = "middle";
 let short = false;
+let current_loading = "";
 
 /* Initializes the chat for the first time */
 function initializeChat(){
@@ -195,6 +196,7 @@ function newUserTextbox(details){
 }
 
 function getAjaxSummary(link){
+    current_loading = link
     setRequestConfigs();
     saved = false;
     const data = JSON.stringify({
@@ -220,13 +222,13 @@ function getAjaxSummary(link){
     request.setRequestHeader('accept', 'application/json');
     request.setRequestHeader('Content-Type', 'application/json');
 
-    request.onreadystatechange = function (){
-        if (!(this.readyState == 4)){
-            localStorage.setItem(link, "Loading...");
-            loadChatFromStorage(sessionStorage.getItem("current_open"));
+    const loading = document.getElementById("loading");
+    loading.className = "active"
 
-        }
-        else if (this.readyState == 4){
+    request.onreadystatechange = function (){
+        if (this.readyState == 4){
+            const loading = document.getElementById("loading");
+            loading.className = "inactive"
             console.log("rt" + encode_input(this.responseText));
             localStorage.setItem(link, encode_input(this.responseText.replace(/"/g, "")));
             if (sessionStorage.getItem("current_open") == link){
@@ -245,6 +247,7 @@ function getAjaxSummary(link){
 
 
 function getAjaxFollowup(link, query){
+    current_loading = link
     setRequestConfigs();
     console.log(lang);
     const data = JSON.stringify({
@@ -255,7 +258,8 @@ function getAjaxFollowup(link, query){
       'query': query
     });
     saved = false
-
+    const loading = document.getElementById("loading");
+    loading.className = "active"
 
     let request = new XMLHttpRequest();
     let endpoint = ""
@@ -273,16 +277,20 @@ function getAjaxFollowup(link, query){
 
     request.onreadystatechange = function (){
         if (!(this.readyState == 4)){
-
         }
         else if (this.readyState == 4){
+            const loading = document.getElementById("loading");
+            loading.className = "inactive"
+
             const old_storage = localStorage.getItem(link);
             console.log(this.responseText);
             const new_storage = old_storage + "|" + encode_input(this.responseText.replace(/"/g, ""));
             localStorage.setItem(link, new_storage);
 
             if (sessionStorage.getItem("current_open") == link){
+
                 loadChatFromStorage(sessionStorage.getItem("current_open"));
+                /* document.getElementById("loading").remove(); */
             }
             saved = true;
         }
@@ -292,6 +300,7 @@ function getAjaxFollowup(link, query){
 }
 
 function loadChatFromStorage(link){
+
     clearChatFromScreen();
 
     const chat_details = localStorage.getItem(link);
@@ -536,7 +545,6 @@ function checkRateLimit(){
 
         sessionStorage.setItem("last-call", Date.now())
         const alert = document.getElementById("alert");
-        alert.innerHTML = "Slow down! (Too many requests. Please wait 20s)";
         alert.className = "active";
         setTimeout(function (){alert.className="inactive";}, 3*1000)
 
