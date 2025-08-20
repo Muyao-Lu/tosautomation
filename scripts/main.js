@@ -78,14 +78,21 @@ function deleteInitialWelcome(link){
     new_textinput.placeholder = "Something unclear? Ask me a followup question :)";
     new_textinput.className = "main-page";
 
+    let loading_text = document.createElement("h3");
+    loading_text.id = "loading"
+    loading_text.className = "disabled"
+    loading_text.textContent = "Loading..."
+
     let instructions = document.createElement("p")
     instructions.innerHTML = "Followup Questions - Click enter to submit"
     instructions.id = "instructions"
+    instructions.className = "enabled"
 
 
     main.prepend(name_header);
     form.appendChild(new_textinput);
     form.prepend(instructions);
+    form.appendChild(loading_text);
 
 }
 
@@ -199,6 +206,7 @@ function getAjaxSummary(link){
     current_loading = link
     setRequestConfigs();
     saved = false;
+    disable_textarea();
     const data = JSON.stringify({
       'link': link,
       'ip': getIp(),
@@ -222,13 +230,10 @@ function getAjaxSummary(link){
     request.setRequestHeader('accept', 'application/json');
     request.setRequestHeader('Content-Type', 'application/json');
 
-    const loading = document.getElementById("loading");
-    loading.className = "active"
-
     request.onreadystatechange = function (){
         if (this.readyState == 4){
-            const loading = document.getElementById("loading");
-            loading.className = "inactive"
+
+            enable_textarea();
             console.log("rt" + encode_input(this.responseText));
             localStorage.setItem(link, encode_input(this.responseText.replace(/"/g, "")));
             if (sessionStorage.getItem("current_open") == link){
@@ -258,11 +263,11 @@ function getAjaxFollowup(link, query){
       'query': query
     });
     saved = false
-    const loading = document.getElementById("loading");
-    loading.className = "active"
 
     let request = new XMLHttpRequest();
     let endpoint = ""
+
+    disable_textarea()
 
     if (state=="testing"){
         endpoint = "http://127.0.0.1:800/followup/";
@@ -279,8 +284,7 @@ function getAjaxFollowup(link, query){
         if (!(this.readyState == 4)){
         }
         else if (this.readyState == 4){
-            const loading = document.getElementById("loading");
-            loading.className = "inactive"
+            enable_textarea();
 
             const old_storage = localStorage.getItem(link);
             console.log(this.responseText);
@@ -561,6 +565,29 @@ function encode_input(string){
 
 function decode_output(string){
     return string.replace(/sc:bar/g, "|")
+}
+
+function disable_textarea(){
+    const textarea = document.getElementById("prompt-input");
+    const instructions = document.getElementById("instructions");
+    const loading = document.getElementById("loading");
+    textarea.disabled = true
+    instructions.className = "disabled"
+    loading.className = "enabled"
+
+
+
+
+
+}
+
+function enable_textarea(){
+    const textarea = document.getElementById("prompt-input");
+    const instructions = document.getElementById("instructions");
+    const loading = document.getElementById("loading");
+    textarea.disabled = false
+    instructions.className = "enabled"
+    loading.className = "disabled"
 }
 
 
