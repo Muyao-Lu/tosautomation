@@ -13,11 +13,15 @@
     padding: 1% 0;
 }
 
-#prompt-input.main-page{
+#prompt-input.main-page:enabled{
     display: block;
     height: 80%;
     margin-top: 1%;
     margin-bottom: 2.5%;
+}
+
+#prompt-input.main-page:disabled{
+    display: none;
 }
 
 /* Link Input */

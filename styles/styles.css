@@ -1,4 +1,3 @@
-
 @keyframes fade-in{
     from{
         opacity: 0;
@@ -10,13 +9,13 @@
 
 @keyframes text-pulse{
     0%{
-        color: rgba(56, 182, 255, 0.75);
+        opacity: 0.25
     }
     50%{
-        color: rgba(56, 182, 255, 0.5);
+        opacity: 1
     }
     100%{
-        color: rgba(56, 182, 255, 0.75);
+        opacity: 0.25
     }
 }
 @keyframes fade-out{
@@ -207,8 +206,7 @@ main{
 }
 
 .textbox br{
-
-    display: none
+    display: none;
 }
 
 .chat-parent{
@@ -401,12 +399,12 @@ body::-webkit-scrollbar{
     animation-fill-mode: backwards;
 }
 
-#alert.inactive, #loading.inactive{
+#alert.inactive{
     display: none;
     opacity: 1;
 }
 
-#alert.active, #loading.active{
+#alert.active{
 
     background-color: rgba(0, 0, 0, 0.75);
     font-size: max(18px, 2vmin);
@@ -433,12 +431,14 @@ body::-webkit-scrollbar{
     color: rgba(56, 182, 255, 0.75);
 }
 
-#loading.active{
-    color: rgba(56, 182, 255, 0.25);
-    animation: text-pulse 2s infinite;
+#loading.enabled{
+    animation: text-pulse 3s infinite;
 }
 
-#instructions{
+#loading.disabled{
+    display: none;
+}
+#instructions.enabled{
     color: rgba(255, 255, 255, 0.3);
     font-family: "Lucida Console", Monaco, monospace;
     text-align: center;
@@ -448,5 +448,8 @@ body::-webkit-scrollbar{
     margin-top: 0.75%;
 }
 
+#instructions.disabled{
+    display: none;
+}
 
 
