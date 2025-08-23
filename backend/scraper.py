@@ -1,5 +1,6 @@
 from langchain_hyperbrowser import HyperbrowserLoader
 from pdfminer.pdfparser import PDFSyntaxError
+from requests.exceptions import HTTPError, Timeout, ConnectionError
 
 from vector_db import vector_db
 import os, dotenv
@@ -28,9 +29,7 @@ class ScraperDatabaseControl:
 
     def scrape_to_db(self, link):
         self.document = self.scraper.scrape(link)
-        print("scraped", self.document[0].page_content)
         if len(self.document[0].page_content) < 1:
-            print("pdf")
             self.document = self.extract_pdf(link)
             self.vector_db.add(link=link, item=self.document)
         else:
@@ -51,6 +50,7 @@ class ScraperDatabaseControl:
             return None
 
     def extract_pdf(self, link):
+        print("begin extraction")
         d = ""
         try:
             headers = {'User-Agent': 'Mozilla/5.0'}
@@ -61,6 +61,9 @@ class ScraperDatabaseControl:
                     d += page.extract_text()
 
             return d
-        except PDFSyntaxError:
+        except (PDFSyntaxError, ConnectionError, HTTPError, Timeout):
+            print("pdf mining error")
             return ""
+        except Exception as e:
+            print(e)
 
