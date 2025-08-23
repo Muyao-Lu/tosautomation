@@ -471,7 +471,7 @@ function initialBind(){
             localStorage.setItem(convertToNamespace("short"), "false");
         }
         else{
-            if (countValidNamespace() > 2){
+            if (countValidNamespace() >= 2){
                 configureForm();
                 createChatsFromStorage();
                 document.addEventListener('keydown', submitFollowup);
@@ -620,3 +620,4 @@ function enable_textarea(){
 
 
 initialBind();
+
