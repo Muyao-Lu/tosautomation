@@ -1,10 +1,33 @@
 let keybind_normal = true;
 let saved = true;
-const state = "deployment";
+const state = "testing";
 
 let lang = "middle";
 let short = false;
 let current_loading = "";
+
+function convertToNamespace(string){
+    return "tos_" + string
+}
+
+function decodeFromNamespace(string){
+    return string.replace(/tos_/g, "")
+}
+
+function validateNamespace(string){
+    return (string.slice(0, 4) == "tos_");
+}
+
+function countValidNamespace(){
+    let c = 0
+    for (let i = 0; i<localStorage.length; i++){
+        if (validateNamespace(localStorage.key(i))){
+            c++
+        }
+    }
+    return c
+}
+
 
 /* Initializes the chat for the first time */
 function initializeChat(){
@@ -98,7 +121,7 @@ function deleteInitialWelcome(link){
 
 /* Creates a new chat */
 function newChat(link){
-    localStorage.setItem(link, "Loading");
+    localStorage.setItem(convertToNamespace(link), "Loading");
     getAjaxSummary(link);
 }
 
@@ -136,11 +159,11 @@ function addTab(link){
 
 function followupChat(q){
     if (checkRateLimit()){
-        const link = sessionStorage.getItem("current_open");
+        const link = sessionStorage.getItem(convertToNamespace("current_open"));
 
-        const old_storage = localStorage.getItem(link);
+        const old_storage = localStorage.getItem(convertToNamespace(link));
         const new_storage = old_storage + "|" + encode_input(q);
-        localStorage.setItem(link, new_storage)
+        localStorage.setItem(convertToNamespace(link), new_storage)
 
         loadChatFromStorage(link);
         getAjaxFollowup(link, q);
@@ -235,9 +258,11 @@ function getAjaxSummary(link){
 
             enable_textarea();
             console.log("rt" + encode_input(this.responseText));
-            localStorage.setItem(link, encode_input(this.responseText.replace(/"/g, "")));
-            if (sessionStorage.getItem("current_open") == link){
-                loadChatFromStorage(sessionStorage.getItem("current_open"));
+            localStorage.setItem(convertToNamespace(link), encode_input(this.responseText.replace(/"/g, "")));
+            console.log(sessionStorage.getItem(convertToNamespace("current_open")));
+            console.log(link);
+            if (sessionStorage.getItem(convertToNamespace("current_open")) == link){
+                loadChatFromStorage(sessionStorage.getItem(convertToNamespace("current_open")));
 
             }
             saved = true;
@@ -286,14 +311,14 @@ function getAjaxFollowup(link, query){
         else if (this.readyState == 4){
             enable_textarea();
 
-            const old_storage = localStorage.getItem(link);
+            const old_storage = localStorage.getItem(convertToNamespace(link));
             console.log(this.responseText);
             const new_storage = old_storage + "|" + encode_input(this.responseText.replace(/"/g, ""));
-            localStorage.setItem(link, new_storage);
+            localStorage.setItem(convertToNamespace(link), new_storage);
 
-            if (sessionStorage.getItem("current_open") == link){
+            if (sessionStorage.getItem(convertToNamespace("current_open")) == link){
 
-                loadChatFromStorage(sessionStorage.getItem("current_open"));
+                loadChatFromStorage(sessionStorage.getItem(convertToNamespace("current_open")));
                 /* document.getElementById("loading").remove(); */
             }
             saved = true;
@@ -307,7 +332,7 @@ function loadChatFromStorage(link){
 
     clearChatFromScreen();
 
-    const chat_details = localStorage.getItem(link);
+    const chat_details = localStorage.getItem(convertToNamespace(link));
     const processed = chat_details.split("|");
 
     for (let i=0; i<processed.length; i++){
@@ -359,18 +384,21 @@ function createChatsFromStorage(){
 
 
     for (let i = 0; i<localStorage.length; i++){
-        if (! (localStorage.key(i) == "short") && ! (localStorage.key(i) == "lang")){
+        if (validateNamespace(localStorage.key(i))){
+            if (! (localStorage.key(i) == convertToNamespace("short")) && ! (localStorage.key(i) == convertToNamespace("lang"))){
 
 
             if (link===null){
                 configureTabs();
-                link = localStorage.key(i);
+                link = decodeFromNamespace(localStorage.key(i));
                 deleteInitialWelcome(link);
                 loadChatFromStorage(link);
                 updateCurrentOpenName(link);
             }
-            addTab(localStorage.key(i));
+            addTab(decodeFromNamespace(localStorage.key(i)));
+            }
         }
+
 
     }
 
@@ -383,7 +411,7 @@ function createChatsFromStorage(){
 }
 
 function acceptNewTab(link){
-    if (localStorage.getItem(link) === null){
+    if (localStorage.getItem(convertToNamespace(link)) === null){
         if (checkRateLimit()){
             clearChatFromScreen();
             cancelPopup();
@@ -420,7 +448,7 @@ function acceptNewTab(link){
 }
 
 function updateCurrentOpenName(name){
-    sessionStorage.setItem("current_open", name)
+    sessionStorage.setItem(convertToNamespace("current_open"), name)
     document.getElementById("name-header").textContent = name;
 }
 
@@ -430,20 +458,20 @@ function initialBind(){
     document.getElementById("chat-input-form").addEventListener("submit", initializeChat);
 
 
-    sessionStorage.setItem("last-user-call", Date.now() - 20 * 1000);
+    sessionStorage.setItem(convertToNamespace("last-user-call"), Date.now() - 20 * 1000);
 
-    if (localStorage.getItem("lang") === null){
-        localStorage.setItem("lang", "middle");
-        if (localStorage.getItem("short") === null){
-            localStorage.setItem("short", "false");
+    if (localStorage.getItem(convertToNamespace("lang")) === null){
+        localStorage.setItem(convertToNamespace("lang"), "middle");
+        if (localStorage.getItem(convertToNamespace("short")) === null){
+            localStorage.setItem(convertToNamespace("short"), "false");
         }
     }
     else{
-        if (localStorage.getItem("short") === null){
-            localStorage.setItem("short", "false");
+        if (localStorage.getItem(convertToNamespace("short")) === null){
+            localStorage.setItem(convertToNamespace("short"), "false");
         }
         else{
-            if (localStorage.length > 2){
+            if (countValidNamespace() > 2){
                 configureForm();
                 createChatsFromStorage();
                 document.addEventListener('keydown', submitFollowup);
@@ -491,7 +519,7 @@ function initiateDeleteChat(link){
 
 }
 function deleteChat(link){
-    localStorage.removeItem(link);
+    localStorage.removeItem(convertToNamespace(link));
     location.reload();
 }
 
@@ -516,20 +544,20 @@ function toggleAside(){
 
 function setRequestConfigs(){
 
-    lang = localStorage.getItem("lang");
-    short = localStorage.getItem("short") === "true";
+    lang = localStorage.getItem(convertToNamespace("lang"));
+    short = localStorage.getItem(convertToNamespace("short")) === "true";
     console.log(short);
 }
 
 function configureForm(){
     for (let item of document.getElementsByClassName("lang-buttons")){
 
-        if (localStorage.getItem("lang") == item.id){
+        if (localStorage.getItem(convertToNamespace("lang")) == item.id){
             item.checked = true
         }
     }
 
-    if (localStorage.getItem("short") === "true"){
+    if (localStorage.getItem(convertToNamespace("short")) === "true"){
         document.getElementById("short").checked = true
     }
     else{
@@ -540,14 +568,14 @@ function configureForm(){
 
 function checkRateLimit(){
     console.log(Date.now())
-    console.log(sessionStorage.getItem("last-call"))
-    if (Date.now() - sessionStorage.getItem("last-call")  > 20 * 1000){
-        sessionStorage.setItem("last-call", Date.now())
+    console.log(sessionStorage.getItem(convertToNamespace("last-call")))
+    if (Date.now() - sessionStorage.getItem(convertToNamespace("last-call"))  > 20 * 1000){
+        sessionStorage.setItem(convertToNamespace("last-call"), Date.now())
         return true
     }
     else{
 
-        sessionStorage.setItem("last-call", Date.now())
+        sessionStorage.setItem(convertToNamespace("last-call"), Date.now())
         const alert = document.getElementById("alert");
         alert.className = "active";
         setTimeout(function (){alert.className="inactive";}, 3*1000)
