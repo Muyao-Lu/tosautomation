@@ -1,0 +1,62 @@
+.question-icon{
+    width: 10%;
+    margin-right: 10%;
+    vertical-align: top;
+}
+
+.chat-icon{
+    width: 10% !important;
+}
+
+#user.textbox{
+    margin-right: 2%;
+    margin-left: 10%;
+}
+
+
+.qa-pair{
+    border: 2px solid white;
+    border-radius: 20px;
+    margin: 2.5% 20%;
+    padding: 1.5% 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    background-color: rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease-in, transform 0.3s ease-in, box-shadow 0.3s ease-in;
+}
+
+.qa-pair:hover{
+    transform: translateY(-2px);
+    box-shadow: 3px 7.5px 0 rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.chat-parent{
+    margin: 0 0 1.5% 0 !important;
+    width: 100%;
+}
+
+#faq{
+    text-align: center;
+    margin: 0;
+    margin-top: 5%;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 3% 0;
+}
+
+#back{
+
+    margin: 5% 20%;
+    padding: 2.5% 0;
+    width: 60%;
+
+    background-color: rgb(56, 182, 255);
+    border: 5px solid white;
+    border-radius: 10px;
+    color: white;
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: max(2vmin, 18px);
+
+}
